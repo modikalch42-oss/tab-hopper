@@ -1,6 +1,6 @@
 # Tab-Hopper
 
-Each level takes place on one of five convincing fake websites (`sites.js` / `sites.css`): a broadsheet news site, a recipe blog, an old-school forum, a bargain-shop product page and a gadget review blog. All names and brands are invented. Only the clutter floating on top is solid; the 👁 button highlights it.
+There is no game wrapper: the page *is* one of five convincing fake websites (`sites.js` / `sites.css`), rotating by day: a broadsheet news site, a recipe blog, an old-school forum, a bargain-shop product page and a gadget review blog. The tab title and favicon are the site's, and every control is disguised as a site feature. The ball is the red badge on a notification bell, Launch is a ▶ "Listen to this article" player bar, the 3-action limit is a "3 free clicks left" paywall meter, the goal is a "Read next" card, and "highlight solid things" is an accessibility button. A first-visit "NEW" tooltip explains the game. All names and brands are invented.
 
 A daily browser-physics puzzle. A ball sits at the top-left of a cluttered fake webpage, and a glowing Goal tab waits at the bottom-right. You get **3 actions** (drag a note, toast, button or pop-up; close a pop-up or ad; accept the cookie banner; toggle the chat widget) to turn the clutter into a ramp, then hit **Launch**.
 

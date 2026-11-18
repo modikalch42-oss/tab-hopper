@@ -2,14 +2,14 @@
 // All site names, people and brands are invented.
 window.TAB_SITES = [
 {
-  id: 'news', fav: '📰', color: '#b3001b',
+  id: 'news', play: 'Listen to this article', len: '4 min', next: 'Read next', fav: '📰', color: '#b3001b',
   tab: 'Man spends 40 minutes closing pop-ups | The Daily Scroll',
   host: 'www.thedailyscroll.news', path: '/technology/2026/nov/18/pop-ups-man-forgets-why',
   html: `<div class="t-news">
   <div class="n-top"><span>Wednesday 18 November 2026</span><span>Subscribe&nbsp;&nbsp;·&nbsp;&nbsp;Sign in</span></div>
   <div class="n-mast">The Daily Scroll</div>
-  <div class="n-nav"><span>News</span><span>World</span><span>Business</span><span>Tech</span><span>Sport</span><span>Opinion</span></div>
-  <div class="n-live"><b>LIVE</b>Cookie consent talks enter their third week</div>
+  <div class="n-nav" data-band><span>News</span><span>World</span><span>Business</span><span>Tech</span><span>Sport</span><span>Opinion</span></div>
+  <div class="n-live" data-band><b>LIVE</b>Cookie consent talks enter their third week</div>
   <div class="n-body">
     <div class="kicker">TECHNOLOGY</div>
     <h1>Man spends 40 minutes closing pop-ups, forgets what he came for</h1>
@@ -28,12 +28,12 @@ window.TAB_SITES = [
   chat: { name: 'Daily Scroll Support', msg: 'Hi! Are you enjoying your 3 free articles?' }
 },
 {
-  id: 'recipe', fav: '🍋', color: '#c2185b',
+  id: 'recipe', play: 'Watch: Nan’s drizzle in 60 seconds', len: '1 min', next: 'Next recipe', fav: '🍋', color: '#c2185b',
   tab: 'The BEST Lemon Drizzle Cake (My Nan’s Secret Recipe!) – Crumbs & Confessions',
   host: 'crumbsandconfessions.blog', path: '/best-lemon-drizzle-cake-nans-secret/',
   html: `<div class="t-rec">
-  <div class="r-head"><span class="r-logo">Crumbs &amp; Confessions</span><span class="r-menu">☰</span></div>
-  <div class="r-nav">Recipes · Baking · Dinners · About me · Shop</div>
+  <div class="r-head" data-band><span class="r-logo">Crumbs &amp; Confessions</span><span class="r-menu">☰</span></div>
+  <div class="r-nav" data-band>Recipes · Baking · Dinners · About me · Shop</div>
   <div class="r-body">
     <div class="r-crumb">Home › Baking › Cakes › Loaf cakes</div>
     <h1>The BEST Lemon Drizzle Cake (My Nan’s Secret Recipe!)</h1>
@@ -54,12 +54,12 @@ window.TAB_SITES = [
   chat: { name: 'Hattie’s Kitchen 🍋', msg: 'Hi! Want the recipe? Scroll down a bit… then a bit more.' }
 },
 {
-  id: 'forum', fav: '🫖', color: '#36578a',
+  id: 'forum', play: 'KettleHead Radio: live now', len: 'Live', next: 'Next thread', fav: '🫖', color: '#36578a',
   tab: 'Does anyone actually read the cookie banner? - KettleHead Forums',
   host: 'forums.kettlehead.org', path: '/showthread.php?t=88213',
   html: `<div class="t-forum">
-  <div class="f-head">KettleHead Forums<small>The UK’s friendliest kettle community · est. 2003</small></div>
-  <div class="f-nav">Home | FAQ | Members | Calendar | Search | Today’s Posts</div>
+  <div class="f-head" data-band>KettleHead Forums<small>The UK’s friendliest kettle community · est. 2003</small></div>
+  <div class="f-nav" data-band>Home | FAQ | Members | Calendar | Search | Today’s Posts</div>
   <div class="f-crumb">KettleHead Forums › General Chat › Off Topic</div>
   <div class="f-thread">Thread: Does anyone actually read the cookie banner?</div>
   <div class="f-post"><div class="f-meta"><span>17-11-2026, 09:14 PM</span><span>#1</span></div><div class="f-row"><div class="f-user"><div class="f-av">🧔</div><b>bramble_dave</b><span>Senior Member</span><span>Join Date: Mar 2006</span><span>Posts: 4,812</span></div><div class="f-text">Genuine question. I just click accept on everything. Have I signed my house away??<div class="f-sig">Dave’s Kettle Restorations · est. 2004 · <u>pm me</u></div></div></div></div>
@@ -74,12 +74,12 @@ window.TAB_SITES = [
   chat: { name: 'KettleBot 3000', msg: 'HELLO. HAVE YOU DESCALED TODAY.' }
 },
 {
-  id: 'shop', fav: '🛒', color: '#e8590c',
+  id: 'shop', play: 'Watch the product video', len: '0:42', next: 'You may also like', fav: '🛒', color: '#e8590c',
   tab: 'Ergonomic Banana Hanger, Pack of 2 : Kitchen & Home | Bargainville',
   host: 'www.bargainville.shop', path: '/dp/B0NANA42/ref=sr_1_3?keywords=banana',
   html: `<div class="t-shop">
-  <div class="s-head"><span class="s-logo">bargainville</span><span class="s-search">Search 4 million deals…</span><span class="s-cart">🛒<sup>3</sup></span></div>
-  <div class="s-deal">⚡ FLASH SALE ends in 00:14:59</div>
+  <div class="s-head" data-band><span class="s-logo">bargainville</span><span class="s-search">Search 4 million deals…</span><span class="s-cart">🛒<sup>3</sup></span></div>
+  <div class="s-deal" data-band>⚡ FLASH SALE ends in 00:14:59</div>
   <div class="s-crumb">Home › Kitchen › Fruit Storage › Banana Hangers</div>
   <div class="s-img"><svg viewBox="0 0 336 140" preserveAspectRatio="xMidYMid meet"><rect width="336" height="140" fill="#fafafa"/><ellipse cx="168" cy="122" rx="64" ry="9" fill="#c49a6c"/><rect x="164" y="30" width="8" height="92" rx="3" fill="#b5895a"/><path d="M168 32 q34 -6 34 22" fill="none" stroke="#8d8d8d" stroke-width="4" stroke-linecap="round"/><g fill="#ffd93b" stroke="#c9a400" stroke-width="1.5"><path d="M202 56 q-30 10 -36 50 q12 -22 40 -38z"/><path d="M204 56 q-14 18 -6 56 q4 -26 14 -42z"/><path d="M206 56 q4 22 26 48 q-10 -28 -14 -44z"/><path d="M204 56 q18 10 30 36 q-4 -24 -18 -36z"/></g><rect x="198" y="50" width="10" height="9" rx="2" fill="#6b5a2a"/><text x="20" y="24" font-family="Arial" font-size="10" fill="#b12704">BESTSELLER</text></svg></div>
   <h1>Ergonomic Banana Hanger, Pack of 2 – Keeps Bananas Fresher Longer!! Bamboo, Easy Assembly</h1>
@@ -102,11 +102,11 @@ window.TAB_SITES = [
   chat: { name: 'Bargainville Help', msg: 'Psst. Customers who viewed this also viewed… more bananas.' }
 },
 {
-  id: 'tech', fav: '📱', color: '#00a693',
+  id: 'tech', play: 'Play the Grumble podcast', len: '38 min', next: 'Next review', fav: '📱', color: '#00a693',
   tab: 'I tested 47 phone cases so you don’t have to | Gadget Grumble',
   host: 'www.gadgetgrumble.net', path: '/reviews/best-phone-cases-tested-47',
   html: `<div class="t-tech">
-  <div class="g-head"><span class="g-logo">gadget<b>grumble</b></span><span>Reviews · Deals · How-to · Podcast</span></div>
+  <div class="g-head" data-band><span class="g-logo">gadget<b>grumble</b></span><span>Reviews · Deals · How-to · Podcast</span></div>
   <div class="g-body">
     <span class="g-tag">REVIEWS</span>
     <h1>I tested 47 phone cases so you don’t have to</h1>
