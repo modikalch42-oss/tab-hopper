@@ -76,6 +76,10 @@ button{font:inherit;color:inherit}
 .bwin{position:relative}
 .chrome{min-width:0;overflow:hidden;height:30px;display:flex;align-items:center;gap:8px;padding:0 7px;background:var(--acc);border-bottom:2px solid var(--ink)}
 .url{flex:1;min-width:0;height:18px;background:var(--paper);border:2px solid var(--ink);display:flex;align-items:center;gap:5px;padding:0 6px;font-size:10px;white-space:nowrap;overflow:hidden}
+.coinct{flex:none;display:flex;align-items:center;gap:4px;height:18px;background:var(--sun);border:2px solid var(--ink);padding:0 5px;font:700 11px/1 "Pixelify Sans",monospace}
+.coinct .px{width:10px}
+.coinct.pop{animation:cpop .3s steps(3)}
+@keyframes cpop{50%{transform:scale(1.25)}}
 .url .host{font-weight:700}.url .path{color:var(--mute);overflow:hidden;text-overflow:ellipsis}
 #viewport{position:relative;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;background:var(--paper)}
 #page{position:absolute;left:0;top:0;width:360px;height:560px;transform-origin:0 0}
@@ -88,7 +92,7 @@ button{font:inherit;color:inherit}
 .dk:disabled{opacity:.5}
 .meter{flex:none;min-width:0;border:2px solid var(--ink);background:var(--paper);box-shadow:3px 3px 0 var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 8px;gap:3px}
 .pips{display:flex;gap:4px}
-.pips .px{width:13px;transition:opacity .2s}
+.pips{gap:2px}.pips .px{width:9px;transition:opacity .2s}
 .pips .used{opacity:.18}
 .meter small{font:700 8px "Space Mono",monospace;letter-spacing:1px;white-space:nowrap}
 .meter.deny{animation:deny .3s steps(4)}
@@ -106,6 +110,10 @@ button{font:inherit;color:inherit}
 #goal .px{width:16px}
 #goal::after{content:"";position:absolute;inset:-7px;border:2px dashed var(--ink);animation:march 1.2s steps(2) infinite}
 @keyframes march{50%{inset:-5px;border-color:var(--mint)}}
+#goal.locked{background:#ddd7ea;color:var(--mute)}
+#goal.locked::after{display:none}
+#goal.unlock{animation:unl .5s steps(4)}
+@keyframes unl{25%,75%{background:var(--sun)}50%{background:var(--mint)}}
 #goal.opened{background:var(--sun);animation:opened .5s steps(3) forwards}
 @keyframes opened{50%{transform:scale(1.2)}100%{transform:scale(1.08)}}
 
@@ -228,24 +236,24 @@ button{font:inherit;color:inherit}
     <div class="row1"><span>TODAY'S PAGE</span><button class="lnk" id="howBtn">HOW TO PLAY ↗</button></div>
     <div class="siterow"><span class="fav" id="hFav"></span><span class="host" id="hHost">…</span><span class="par" id="hPar">PAR –</span></div>
     <button class="cta" id="openBtn">▶ OPEN TODAY'S PAGE</button>
-    <div class="fine">3 CLICKS MAX · UNLIMITED LAUNCHES · NEW PAGE DAILY</div>
+    <div class="fine">6 MOVES · GRAB EVERY COIN · THEN HOP THE TAB</div>
     <div class="row2"><button class="ghost" id="practiceBtn">PRACTICE ∞</button><button class="ghost" id="readmeBtn">README.TXT</button></div>
   </div>
 </section>
 
 <section id="game" class="screen" hidden>
   <div class="win bwin" id="bwin">
-    <div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="url"><span id="lock"></span><span class="host" id="host"></span><span class="path" id="path"></span></span></div>
+    <div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="url"><span id="lock"></span><span class="host" id="host"></span><span class="path" id="path"></span></span><span class="coinct" id="coinCt"></span></div>
     <div id="viewport"><div id="page">
       <div id="decor"></div>
-      <div id="goal"><span id="flag"></span><span>NEW TAB</span></div>
+      <div id="goal" class="locked"><span id="goalIco"></span><span id="goalTxt">NEW TAB</span></div>
       <div id="els"></div>
       <canvas id="fx" width="180" height="280"></canvas>
     </div></div>
   </div>
   <div class="dock" id="dock">
     <button class="dk" id="reset" title="Put everything back">↺<small>RESET</small></button>
-    <div class="meter" id="meter"><span class="pips" id="pips"></span><small id="meterTxt">3 LEFT</small></div>
+    <div class="meter" id="meter"><span class="pips" id="pips"></span><small id="meterTxt">6 MOVES</small></div>
     <button class="cta launch" id="launch">▶ LAUNCH</button>
     <button class="dk" id="eye" title="Highlight what's solid">◎<small>SOLID</small></button>
   </div>
@@ -265,7 +273,7 @@ const INK='#17131f',PAPER='#fbf8f1',LINK='#2b44ff',VISITED='#6a2bd9',HOT='#ff4f8
 const ACC={news:LINK,recipe:HOT,forum:VISITED,shop:'#ff8a00',tech:MINT};
 const viewport=$('viewport'),page=$('page'),elsBox=$('els'),cv=$('fx'),ctx=cv.getContext('2d');
 ctx.imageSmoothingEnabled=false;
-const MAX_ACTIONS=3,DRAGGABLE=new Set(['note','toast','sub','popup']);
+const MAX_ACTIONS=6,DRAGGABLE=new Set(['note','toast','sub','popup']);
 const ICON={note:'🗒️',toast:'🔔',sub:'🔴',popup:'🪟',close:'❌',cookie:'🍪',chat:'💬'};
 
 /* ---------- pixel icons ---------- */
@@ -277,6 +285,7 @@ const P={
   x:['#...#','.#.#.','..#..','.#.#.','#...#'],
   flag:['#ppp....','#ppppp..','#ppppppp','#ppppp..','#ppp....','#.......','#.......','#.......','#.......'],
   lock:['.###.','#...#','#...#','#####','##.##','#####'],
+  coin:['..###..','.#yyy#.','#yy#yy#','#yy#yy#','#yy#yy#','.#yyy#.','..###..'],
   menu:['#######','.......','#######','.......','#######'],
   snd:['....#....','...##..#.','#####...#','#####.#.#','#####.#.#','#####...#','...##..#.','....#....'],
   mute:['....#....','...##....','#####.#.#','#####..#.','#####.#.#','#####....','...##....','....#....']
@@ -299,6 +308,8 @@ const sfx={
   clack:()=>{tone(2600,.018,'square',.05);noise(.035,.35,0,'highpass',3000);tone(140,.05,'sine',.15)},
   deny:()=>tone(130,.14,'square',.05),
   launch:()=>{tone(440,.06,'square',.06);tone(880,.1,'square',.05,.06)},
+  coin:k=>{const f=Math.pow(2,k*2/12);tone(988*f,.05,'square',.05);tone(1319*f,.14,'square',.05,.05)},
+  unlock:()=>[0,7,12].forEach((s,i)=>tone(660*Math.pow(2,s/12),.1,'square',.05,i*.06)),
   win:()=>[0,4,7,12,16].forEach((s,i)=>tone(523.25*Math.pow(2,s/12),.18,'square',.06,i*.08)),
   fail:()=>tone(300,.4,'square',.05,0,.4)
 };
@@ -316,14 +327,15 @@ function todayNum(){const d=new Date();return Math.floor((Date.UTC(d.getFullYear
 const num=todayNum(),dailyIdx=((num-1)%NL+NL)%NL;
 const MON=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'],now=new Date();
 const DAYTXT=`#${num} · ${MON[now.getMonth()]} ${now.getDate()}`;
-let mode='daily',idx=0,level,els,used=0,history=[],launches=0,running=false,won=false,views=[],scale=1,site=SITES[0];
+let runs=[],gotMask=0,mode='daily',idx=0,level,els,used=0,history=[],launches=0,running=false,won=false,views=[],scale=1,site=SITES[0];
+const pc=m=>{let c=0;while(m){m&=m-1;c++}return c};
 const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 
 /* ---------- screens ---------- */
 function show(id){$('home').hidden=id!=='home';$('game').hidden=id!=='game';$('menu').hidden=true;if(id==='game')fit();else $('topNum').textContent=DAYTXT;scrollTo(0,0)}
 function homeCard(){const s=SITES[dailyIdx%SITES.length],L=LEVELS[dailyIdx];
-  $('hFav').style.background=ACC[s.id];$('hHost').textContent=s.host;$('hPar').textContent='PAR '+(L?L.par:'–');
-  const best=store.get('th-best-'+num);$('openBtn').textContent=best?'▶ REPLAY TODAY\'S PAGE':'▶ OPEN TODAY\'S PAGE'}
+  $('hFav').style.background=ACC[s.id];$('hHost').textContent=s.host;$('hPar').textContent=(L?L.coins.length:'–')+' COINS';
+  const best=store.get('th2-best-'+num);$('openBtn').textContent=best?'▶ REPLAY TODAY\'S PAGE':'▶ OPEN TODAY\'S PAGE'}
 
 /* ---------- the website inside the window ---------- */
 function decor(){
@@ -398,27 +410,30 @@ function flashSolid(ms=1400){elsBox.classList.add('reveal');clearTimeout(revealT
 function load(newMode,i){
   mode=newMode;idx=i;level=LEVELS[idx];show('game');decor();
   $('modal').hidden=true;reset(true);
-  const best=mode==='daily'&&store.get('th-best-'+num);
+  const best=mode==='daily'&&store.get('th2-best-'+num);
   if(best)setTimeout(()=>showResult(best,true),350);
   else if(!store.get('th-readme'))setTimeout(readme,250);
 }
 function reset(hard){
   els=level.els.map(e=>({...e}));used=0;history=[];won=false;running=false;
-  if(hard)launches=0;
-  $('goal').classList.remove('opened');
+  if(hard){launches=0;runs=[]}
+  $('goal').classList.remove('opened');gotMask=0;lockGoal(true);coinCt();
   build();hud();ball={x:S.START.x,y:S.START.y};trail=[];particles=[];status('');flashSolid();
 }
 const CUR_ON=pix(P.cursor,ink),CUR_OFF=pix(P.cursor,ink,'px used');
+const FLAGI=pix(P.flag,{'#':INK,p:HOT}),LOCKI=pix(P.lock,{'#':'#5d5670'}),COINI=pix(P.coin,{'#':INK,y:SUN});
 function hud(){
   const left=MAX_ACTIONS-used;
-  $('pips').innerHTML=[0,1,2].map(i=>i<left?CUR_ON:CUR_OFF).join('');
-  $('meterTxt').textContent=left+' LEFT';
+  $('pips').innerHTML=[0,1,2,3,4,5].map(i=>i<left?CUR_ON:CUR_OFF).join('');
+  $('meterTxt').textContent=left+(left===1?' MOVE':' MOVES');
   $('topNum').textContent=mode==='practice'&&!$('game').hidden?'PRACTICE PAGE':DAYTXT;
   $('launch').disabled=running||won;$('reset').disabled=running;
 }
+function lockGoal(locked){$('goal').classList.toggle('locked',locked);$('goalIco').innerHTML=locked?LOCKI:FLAGI;$('goalTxt').textContent=locked?(level?level.coins.length:0)+' COINS':'NEW TAB'}
+function coinCt(pop){const c=$('coinCt');c.innerHTML=COINI+`${pc(gotMask)}/${level?level.coins.length:0}`;if(pop)retrigger(c,'pop')}
 function status(t,cls){$('status').innerHTML=t?`<span class="${cls||''}">${esc(t)}</span>`:''}
 function spend(icon){used++;history.push(icon);hud();status('')}
-function canAct(){if(running||won)return false;if(used>=MAX_ACTIONS){retrigger($('meter'),'deny');sfx.deny();status('No clicks left · launch or reset');return false}return true}
+function canAct(){if(running||won)return false;if(used>=MAX_ACTIONS){retrigger($('meter'),'deny');sfx.deny();status('No moves left · launch or reset');return false}return true}
 
 /* ---------- input ---------- */
 function toPage(e){const r=page.getBoundingClientRect();return[(e.clientX-r.left)/scale,(e.clientY-r.top)/scale]}
@@ -460,12 +475,16 @@ viewport.addEventListener('pointerup',endDrag);viewport.addEventListener('pointe
 /* ---------- pixel ball, trail, confetti (drawn at half resolution) ---------- */
 const BALL=(()=>{const c=document.createElement('canvas');c.width=c.height=11;const x=c.getContext('2d');
   for(let j=0;j<11;j++)for(let i=0;i<11;i++){const d=Math.hypot(i-5,j-5);if(d>5.4)continue;x.fillStyle=d>4.3?INK:((i===3&&j===3)||(i===4&&j===3)||(i===3&&j===4))?'#fff':HOT;x.fillRect(i,j,1,1)}return c})();
+const COINF=[4.6,3.4,1.4,3.4].map(a=>{const c=document.createElement('canvas');c.width=c.height=9;const x=c.getContext('2d');
+  for(let j=0;j<9;j++)for(let i=0;i<9;i++){const u=(i-4)/a,v=(j-4)/4.6,d=u*u+v*v;if(d>1.05)continue;const edge=((i-4)/(a-1))**2+((j-4)/3.6)**2>1||a<2;
+    x.fillStyle=edge?INK:(i===3&&j<=4&&a>3)?'#fff':SUN;x.fillRect(i,j,1,1)}return c});
 let ball={x:S.START.x,y:S.START.y},trail=[],particles=[],sim=null,acc=0,lastT=0,squash=0;
 const H2=v=>Math.round(v/2);
 function draw(t){
   ctx.clearRect(0,0,180,280);
   // launch pad under the start
   ctx.fillStyle=INK;ctx.fillRect(H2(S.START.x)-6,H2(S.START.y)+6,13,2);ctx.fillRect(H2(S.START.x)-5,H2(S.START.y)+8,2,3);ctx.fillRect(H2(S.START.x)+3,H2(S.START.y)+8,2,3);
+  if(level)level.coins.forEach((c,i)=>{if(gotMask>>i&1)return;const f=COINF[Math.floor(t/130+i*1.7)%4];ctx.drawImage(f,H2(c[0])-4,H2(c[1])-4)});
   for(let k=0;k<trail.length;k++){const p=trail[k];ctx.globalAlpha=(k+1)/trail.length*.6;ctx.fillStyle=k%2?HOT:SUN;ctx.fillRect(H2(p[0])-1,H2(p[1])-1,2,2)}
   ctx.globalAlpha=1;
   let bx=ball.x,by=ball.y;
@@ -482,6 +501,7 @@ function tick(t){
     acc+=dt;let n=0;
     while(acc>=S.DT&&!sim.done&&n<60){S.step(sim);acc-=S.DT;n++;
       for(const h of sim.hits)onHit(h);
+      for(const i of sim.gotNow)gotCoin(i);
       if(sim.n%5===0){trail.push([sim.x,sim.y]);if(trail.length>18)trail.shift()}}
     ball={x:sim.x,y:sim.y};
     if(sim.done)finish(sim.done);
@@ -491,6 +511,9 @@ function tick(t){
   if(!$('game').hidden)draw(t);
   requestAnimationFrame(tick);
 }
+function gotCoin(i){gotMask|=1<<i;const c=level.coins[i],n=pc(gotMask);sfx.coin(n);coinCt(true);
+  for(let k=0;k<10;k++){const a=k/10*Math.PI*2;particles.push({x:c[0],y:c[1],vx:Math.cos(a)*140,vy:Math.sin(a)*140-80,r:Math.random()*6,c:k%2?SUN:'#fff',life:.55})}
+  if(n===level.coins.length){lockGoal(false);retrigger($('goal'),'unlock');setTimeout(sfx.unlock,120)}}
 let lastHit={};
 function onHit(h){
   const e=els[h.id],v=views[h.id];if(!v)return;squash=Math.min(1,h.v/700);
@@ -500,29 +523,31 @@ function onHit(h){
 }
 
 /* ---------- launch & result ---------- */
-function launch(){if(running||won)return;A();running=true;launches++;hud();status('');trail=[];acc=0;sim=S.start(els);sfx.launch()}
+function launch(){if(running||won)return;A();running=true;launches++;hud();status('');trail=[];acc=0;gotMask=0;lockGoal(true);coinCt();sim=S.start(els,level.coins);sfx.launch()}
 const FAIL={fell:'404 · ball not found',stalled:'ball is buffering…',timeout:'request timed out'};
 function finish(res){
-  running=false;sim=null;
+  const N=level.coins.length,got=pc(sim.got),tried=sim.triedGoal;running=false;sim=null;
+  runs.push({g:got,n:N,w:res==='win'});
   if(res==='win'){
-    won=true;hud();$('goal').classList.add('opened');sfx.win();confetti();status('new tab opened','good');
-    const r={used,par:level.par,launches,history:history.slice()};
-    if(mode==='daily'){const b=store.get('th-best-'+num);if(!b||r.used<b.used||(r.used===b.used&&r.launches<b.launches))store.set('th-best-'+num,r);homeCard()}
+    won=true;hud();$('goal').classList.add('opened');sfx.win();confetti();status('all coins · new tab opened','good');
+    const r={launches,used,n:N,runs:runs.slice()};
+    if(mode==='daily'){const b=store.get('th2-best-'+num);if(!b||r.launches<b.launches||(r.launches===b.launches&&r.used<b.used))store.set('th2-best-'+num,r);homeCard()}
     setTimeout(()=>showResult(r,false),800);
   }else{
-    sfx.fail();status(FAIL[res]+(used<MAX_ACTIONS?' · keep tweaking':' · reset to retry'));
-    setTimeout(()=>{if(!running){ball={x:S.START.x,y:S.START.y};trail=[]}hud()},800);
+    sfx.fail();status((tried&&got<N?'tab locked · grab every coin first':FAIL[res])+` · ${got}/${N} coins`);
+    setTimeout(()=>{if(!running){ball={x:S.START.x,y:S.START.y};trail=[];gotMask=0;lockGoal(true);coinCt()}hud()},900);
   }
 }
 function confetti(){const G=S.GOAL,cs=[HOT,SUN,MINT,LINK,VISITED];for(let i=0;i<60;i++)particles.push({x:G.x+G.w/2,y:G.y+8,vx:(Math.random()-.5)*400,vy:-200-Math.random()*360,r:Math.random()*6,c:cs[i%5],life:1+Math.random()*.6})}
-function grade(r){if(r.used<r.par)return'BIRDIE!';if(r.used===r.par)return'PAR. CLEAN HOP.';return'IT HOPPED.'}
+function grade(r){return r.launches===1?'FIRST TRY!':r.launches<=3?'SMOOTH HOP.':r.launches<=6?'TAB OPENED.':'PERSISTENCE PAYS.'}
 function shareText(r){const head=mode==='daily'?`Tab-Hopper #${num}`:'Tab-Hopper Practice';
-  return `${head} | ${r.used}/${MAX_ACTIONS} Clicks (par ${r.par}) | 🚀×${r.launches}\n${[...r.history,'🚩'].join('↘️')}`}
+  const rows=r.runs.slice(-6).map(x=>'🟡'.repeat(x.g)+'⚫'.repeat(x.n-x.g)+(x.w?' 🚩':''));
+  return `${head} · ${r.launches} launch${r.launches===1?'':'es'} · ${r.used}/${MAX_ACTIONS} moves\n${r.runs.length>6?'…\n':''}${rows.join('\n')}`}
 function showResult(r,restored){
   const m=$('modal'),txt=shareText(r);
   m.innerHTML=`<div class="win mwin"><div class="tbar"><span class="dots"><i></i><i></i><i></i></span>result.txt</div><div class="mbody">
   <div class="eyebrow">${mode==='daily'?'TAB-HOPPER #'+num:'PRACTICE PAGE'}${restored?" · TODAY'S BEST":''}</div><h2>${grade(r)}</h2>
-  <div class="stats"><div><b>${r.used}/3</b><small>CLICKS</small></div><div><b>${r.par}</b><small>PAR</small></div><div><b>${r.launches}</b><small>LAUNCHES</small></div></div>
+  <div class="stats"><div><b>${r.launches}</b><small>LAUNCHES</small></div><div><b>${r.used}/6</b><small>MOVES</small></div><div><b>${r.n}/${r.n}</b><small>COINS</small></div></div>
   <div class="sharebox">${esc(txt)}</div>
   <div class="mrow"><button class="cta" id="share">SHARE ↗</button><button class="ghost" id="again">PLAY AGAIN</button></div>
   <div class="mrow" style="grid-template-columns:1fr 1fr"><button class="ghost" id="another">PRACTICE ∞</button><button class="ghost" id="close">CLOSE</button></div></div></div>`;
@@ -537,10 +562,10 @@ function readme(){
   m.innerHTML=`<div class="win mwin"><div class="tbar"><span class="dots"><i></i><i></i><i></i></span>readme.txt</div><div class="mbody">
   <div class="eyebrow">HOW TO PLAY</div><h2>HOP THE TAB</h2>
   <ol class="steps"><li><span>Hit <b>▶ LAUNCH</b> and the ball flies off its pad at the top-left.</span></li>
-  <li><span>Get it into the <b>NEW TAB</b> in the bottom-right corner.</span></li>
-  <li><span>Before launching you get <b>3 clicks</b>: drag notes, notifications, buttons and pop-ups · close ✕ ads and pop-ups · accept cookies · open or shut the chat.</span></li>
+  <li><span>In one run, it has to grab <b>every coin</b>. Then the locked <b>NEW TAB</b> in the corner opens. Get the ball in.</span></li>
+  <li><span>You have <b>6 moves</b> to rebuild the page: drag notes, notifications, buttons and pop-ups · close ✕ ads and pop-ups · accept cookies · open or shut the chat.</span></li>
   <li><span>Only the clutter is solid. The page underneath is scenery. <b>◎ SOLID</b> shows what's what, and pink buttons are bouncy.</span></li>
-  <li><span>Unlimited launches. Use fewer clicks to beat <b>par</b>.</span></li></ol>
+  <li><span>Tweak and relaunch as often as you like. <b>Fewer launches</b> is a better score. ↺ RESET puts the page back.</span></li></ol>
   <button class="cta" id="gotit">GOT IT</button></div></div>`;
   m.hidden=false;$('gotit').onclick=()=>{m.hidden=true;store.set('th-readme',1)};
 }
@@ -561,7 +586,7 @@ $('menu').onclick=e=>{const g=e.target.dataset.go;if(!g)return;$('menu').hidden=
   if(g==='home'){show('home');homeCard()}else if(g==='daily')load('daily',dailyIdx);else if(g==='practice')practice();else readme()};
 $('logoCur').innerHTML=pix(P.cursor,ink,'px cur');
 $('lock').innerHTML=pix(P.lock,{'#':INK});$('lock').firstChild.style.width='8px';
-$('flag').innerHTML=pix(P.flag,{'#':INK,p:HOT});
+
 $('topNum').textContent=DAYTXT;
 $('openBtn').onclick=()=>load('daily',dailyIdx);
 $('practiceBtn').onclick=practice;

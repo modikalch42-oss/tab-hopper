@@ -1,11 +1,14 @@
 // Builds levels.js: a list of daily puzzles, each checked by simulation.
-// Usage: node tools/generate.js [count] [seed]
+// Usage: node tools/generate.js [count] [seed] [dry | out.json]
 // 1. Find a "solved" page where 2-3 UI elements carry the ball into the goal,
-//    and every one of them is needed.
-// 2. Add clutter that does not break it.
-// 3. Break it with k = par moves (knock a ramp away, drop a popup or cookie banner
-//    in the way, close the chat), each of which breaks the page on its own.
-// 4. Check the broken page fails, and (for par >= 2) that no single action fixes it.
+//    every one of them is needed, and it still works with any piece nudged 4px.
+// 2. Drop 3-5 coins along that path (the ball must collect all of them, then reach
+//    the goal), again checked against nudges.
+// 3. Add clutter that does not break it and covers no coins.
+// 4. Break it with k = 2-4 moves (knock a ramp away, drop a pop-up/ad/cookie banner in
+//    the path, close the chat), each of which breaks the page on its own.
+// 5. Check the broken page fails and that no single action fixes it.
+// Players get 6 moves, so there is always room to experiment.
 const Sim = require('../sim.js');
 const fs = require('fs');
 const { W, H, START, GOAL } = Sim;
@@ -52,7 +55,47 @@ function mk(t, x, y) {
   return e;
 }
 function randomLegal(t, others = [], tries = 60) { for (let i = 0; i < tries; i++) { const e = mk(t); if (t === 'chat' && rnd() < .5) e.open = true; if (legal(e) && panelLegal(e) && !clashes(e, others)) return e; } return null; }
-const wins = els => Sim.run(els).res === 'win';
+// coins for the level being built; a page only "wins" if the ball collects all of them and then reaches the goal
+let COINS = [];
+const wins = els => Sim.run(els, false, COINS).res === 'win';
+// distance from a point to an element's solid shape
+function distTo(e, x, y) {
+  if (e.t === 'chat') {
+    let d = Math.hypot(x - e.x, y - e.y) - Sim.CHAT_R;
+    if (e.open) { const p = Sim.PANEL; d = Math.min(d, boxDist(x, y, e.x + p.dx, e.y + p.dy, p.hw, p.hh, 1, 0)); }
+    return d;
+  }
+  return boxDist(x, y, e.x, e.y, e.w / 2, e.h / 2, e.c, e.s);
+}
+function boxDist(x, y, cx, cy, hw, hh, c, s) {
+  const dx = x - cx, dy = y - cy, lx = dx * c + dy * s, ly = -dx * s + dy * c;
+  const qx = Math.max(-hw, Math.min(hw, lx)), qy = Math.max(-hh, Math.min(hh, ly));
+  return Math.hypot(lx - qx, ly - qy);
+}
+const coinClash = (e, coins) => coins.some(([x, y]) => distTo(e, x, y) < Sim.CR + 3);
+
+// spread 3-5 coins along the designed path; keep them apart, off the solids, and robust to nudges
+function placeCoins(sol) {
+  const pts = sol.path, len = [0];
+  for (let i = 1; i < pts.length; i++) len.push(len[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  const total = len[len.length - 1];
+  for (let attempt = 0; attempt < 14; attempt++) {
+    const n = ri(3, 5), coins = [];
+    for (let k = 0; k < n; k++) {
+      const f = .14 + (.8 * (k + .5)) / n + (rnd() - .5) * .06, target = f * total;
+      let j = 0; while (j < len.length - 1 && len[j] < target) j++;
+      coins.push([Math.round(pts[j][0]), Math.round(pts[j][1])]);
+    }
+    const G = Sim.GOAL;
+    if (coins.some(([x, y], i) => coins.some(([x2, y2], j) => j > i && Math.hypot(x - x2, y - y2) < 42))) continue;
+    if (coins.some(([x, y]) => Math.hypot(x - START.x, y - START.y) < 45 || (x > G.x - 14 && x < G.x + G.w + 14 && y > G.y - 14 && y < G.y + G.h + 14))) continue;
+    if (sol.els.some(e => coinClash(e, coins))) continue;
+    COINS = coins;
+    if (wins(sol.els) && robust(sol.els)) return coins;
+  }
+  COINS = [];
+  return null;
+}
 
 function findSolved() {
   for (let tries = 0; tries < 20000; tries++) {
@@ -80,7 +123,7 @@ function robust(els) { return els.every((e, i) => NUDGE.every(([dx, dy]) => wins
 function addClutter(els) {
   const want = ri(2, 4), types = ['popup', 'ad', 'toast', 'note', 'chat', 'sub', 'note'];
   for (let i = 0, added = 0; i < 40 && added < want; i++) {
-    const e = randomLegal(pick(types), els); if (!e) continue;
+    const e = randomLegal(pick(types), els); if (!e || coinClash(e, COINS)) continue;
     if (e.t === 'chat' && els.some(x => x.t === 'chat')) continue;
     const next = [...els, e];
     if (wins(next) && robust(next.slice(0, els.n0).concat(next.slice(els.n0)))) { next.n0 = els.n0; els = next; added++; }
@@ -113,13 +156,13 @@ function scramble(solved, path, k) {
     if (kind === 'move') {
       const cand = solIdx.filter(i => DRAG.has(solved[i].t) && !ops.some(o => o.i === i)); if (!cand.length) continue;
       const i = pick(cand), e = solved[i];
-      for (let t = 0; t < 40; t++) { const x = ri(30, W - 30), y = ri(70, H - 30); if (Math.hypot(x - e.x, y - e.y) < 90) continue; const m = { ...e, x, y }; if (legal(m) && !clashes(m, applyOps(solved, ops).filter((_, j) => j !== i))) { op = { kind, i, x, y }; break; } }
+      for (let t = 0; t < 40; t++) { const x = ri(30, W - 30), y = ri(70, H - 30); if (Math.hypot(x - e.x, y - e.y) < 90) continue; const m = { ...e, x, y }; if (legal(m) && !coinClash(m, COINS) && !clashes(m, applyOps(solved, ops).filter((_, j) => j !== i))) { op = { kind, i, x, y }; break; } }
     } else if (kind === 'chat') {
       const i = solved.findIndex(e => e.t === 'chat' && e.open); if (i < 0 || i >= solved.n0 || ops.some(o => o.i === i)) continue; op = { kind, i };
     } else if (pts.length) {
       const p = pick(pts), t = kind;
       const e = t === 'cookie' ? mk('cookie', W / 2, Math.round(p[1])) : mk(t, Math.round(p[0] + ri(-20, 20)), Math.round(p[1] + ri(-15, 15)));
-      if (!legal(e) || (t === 'cookie' && (e.y < 110 || e.y > H - 90)) || clashes(e, applyOps(solved, ops))) continue;
+      if (!legal(e) || (t === 'cookie' && (e.y < 110 || e.y > H - 90)) || coinClash(e, COINS) || clashes(e, applyOps(solved, ops))) continue;
       op = { kind: 'add', e };
     }
     if (!op) continue;
@@ -135,7 +178,9 @@ function applyOps(els, ops) {
 }
 
 function makeLevel(k) {
+  COINS = [];
   const sol = findSolved(); if (!sol) return null;
+  const coins = placeCoins(sol); if (!coins) return null;
   const n0 = sol.els.length;
   const base = sol.els.slice(); base.n0 = n0;
   let els = addClutter(base);
@@ -144,18 +189,13 @@ function makeLevel(k) {
     const start = applyOps(els, ops);
     if (wins(start) || !tidy(start)) continue;
     if (k >= 2) { let ok = true; for (const a of singleActions(start)) { const s = clone(start); a(s); if (wins(s)) { ok = false; break; } } if (!ok) continue; }
-    if (k === 3) { // no pair of actions fixes it either (drags on a coarser grid)
-      let ok = true; const A1 = singleActions(start, 44);
-      outer: for (const a of A1) { const s1 = clone(start); a(s1); for (const b of singleActions(s1, 44)) { const s2 = clone(s1); b(s2); if (wins(s2)) { ok = false; break outer; } } }
-      if (!ok) continue;
-    }
     // the designed fix, one action per break (used for testing and a future "show me" button)
     let added = els.length;
     const fix = ops.map(o => o.kind === 'move' ? { a: 'drag', i: o.i, x: els[o.i].x, y: els[o.i].y } : o.kind === 'chat' ? { a: 'chat', i: o.i } : { a: o.e.t === 'cookie' ? 'accept' : 'close', i: added++ });
     // shuffle so the order does not hint at the solution
     const order = start.map((_, i) => i).sort(() => rnd() - .5), inv = [];
     order.forEach((oi, ni) => inv[oi] = ni);
-    return { par: k, els: order.map(i => start[i]), fix: fix.map(f => ({ ...f, i: inv[f.i] })) };
+    return { par: k, coins, els: order.map(i => start[i]), fix: fix.map(f => ({ ...f, i: inv[f.i] })) };
   }
   return null;
 }
@@ -163,17 +203,18 @@ function makeLevel(k) {
 const count = +(process.argv[2] || 365), seed = +(process.argv[3] || 20261118);
 rnd = mulberry32(seed);
 const levels = [], t0 = Date.now();
-// par mix: 20% one-click, 45% two, 35% three (the target par is fixed first so retries don't skew it easy)
+// difficulty = number of breaks to undo (players get 6 moves): 30% two, 45% three, 25% four.
+// The target is picked first so retries don't skew the mix easy.
 while (levels.length < count) {
-  const k = rnd() < .2 ? 1 : rnd() < .5625 ? 2 : 3;
+  const k = rnd() < .3 ? 2 : rnd() < .643 ? 3 : 4;
   let L = null; while (!L) L = makeLevel(k);
   // final determinism check: the shipped start state must not win, and must round-trip through JSON unchanged
   const back = JSON.parse(JSON.stringify(L.els)); if (wins(back)) continue;
   levels.push(L);
   if (levels.length % 25 === 0) console.error(levels.length, 'levels', ((Date.now() - t0) / 1000).toFixed(1) + 's');
 }
-const pars = [1, 2, 3].map(p => levels.filter(l => l.par === p).length);
-console.error('done', levels.length, 'pars', pars.join('/'), ((Date.now() - t0) / 1000).toFixed(1) + 's');
+const pars = [2, 3, 4].map(p => levels.filter(l => l.par === p).length);
+console.error('done', levels.length, 'breaks 2/3/4:', pars.join('/'), ((Date.now() - t0) / 1000).toFixed(1) + 's');
 // argv[4]: 'dry' = don't write; a .json path = write raw batch (merge with tools/merge.js); default = write levels.js
 const outArg = process.argv[4];
 if (outArg && outArg.endsWith('.json')) fs.writeFileSync(outArg, JSON.stringify(levels));

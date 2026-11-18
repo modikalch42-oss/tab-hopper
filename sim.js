@@ -12,6 +12,7 @@
     chat: { e: .45, mu: .002 }, panel: { e: .3, mu: .003 }
   };
   const PANEL = { dx: -58, dy: -116, hw: 72, hh: 86 }, CHAT_R = 22;
+  const CR = 9; // coin radius: the ball collects a coin when their circles touch
 
   function colliders(els) {
     const out = [];
@@ -25,8 +26,11 @@
     return out;
   }
 
-  function start(els) {
-    return { x: START.x, y: START.y, vx: LAUNCH.vx, vy: LAUNCH.vy, n: 0, slow: 0, cols: colliders(els), done: null, hits: [] };
+  // coins: [[x,y],...]. The goal only counts once every coin has been collected in this run.
+  function start(els, coins) {
+    coins = coins || [];
+    return { x: START.x, y: START.y, vx: LAUNCH.vx, vy: LAUNCH.vy, n: 0, slow: 0, cols: colliders(els), done: null, hits: [],
+      coins, got: 0, all: (1 << coins.length) - 1, gotNow: [], inGoal: false, triedGoal: false };
   }
 
   function resolve(s, col, wx, wy, pen) {
@@ -69,8 +73,16 @@
       }
       resolve(s, c, nlx * c.c - nly * c.s, nlx * c.s + nly * c.c, pen);
     }
+    s.gotNow = [];
+    for (let i = 0; i < s.coins.length; i++) {
+      if (s.got >> i & 1) continue;
+      const cx = s.x - s.coins[i][0], cy = s.y - s.coins[i][1];
+      if (cx * cx + cy * cy < (R + CR) * (R + CR)) { s.got |= 1 << i; s.gotNow.push(i); }
+    }
     s.n++;
-    if (s.x > GOAL.x && s.x < GOAL.x + GOAL.w && s.y > GOAL.y && s.y < GOAL.y + GOAL.h) s.done = 'win';
+    s.inGoal = s.x > GOAL.x && s.x < GOAL.x + GOAL.w && s.y > GOAL.y && s.y < GOAL.y + GOAL.h;
+    if (s.inGoal && s.got === s.all) s.done = 'win';
+    else if (s.inGoal) { s.triedGoal = true; if (s.y > H + 2 * R) s.done = 'fell'; else if (s.n >= MAX_STEPS) s.done = 'timeout'; }
     else if (s.y > H + 2 * R) s.done = 'fell';
     else if (s.n >= MAX_STEPS) s.done = 'timeout';
     else {
@@ -79,12 +91,12 @@
     return s;
   }
 
-  function run(els, keepPath) {
-    const s = start(els), touched = new Set(), path = [];
+  function run(els, keepPath, coins) {
+    const s = start(els, coins), touched = new Set(), path = [];
     while (!s.done) { step(s); for (const h of s.hits) touched.add(h.id); if (keepPath && s.n % 6 === 0) path.push([s.x, s.y]); }
-    return { res: s.done, touched, path, steps: s.n };
+    return { res: s.done, touched, path, steps: s.n, got: s.got };
   }
 
-  const api = { W, H, R, DT, START, LAUNCH, GOAL, PANEL, CHAT_R, SPEC, colliders, start, step, run };
+  const api = { W, H, R, CR, DT, START, LAUNCH, GOAL, PANEL, CHAT_R, SPEC, colliders, start, step, run };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.TabSim = api;
 })(this);
