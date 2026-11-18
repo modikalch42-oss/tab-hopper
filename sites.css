@@ -1,0 +1,103 @@
+/* Styling for the fake websites in sites.js (scenery only). */
+#decor{position:absolute;inset:0;overflow:hidden;background:#fff;color:#222;pointer-events:none}
+#decor figure{margin:0}
+#decor svg{display:block;width:100%}
+#decor p,#decor ul,#decor ol,#decor h1,#decor h2,#decor h3{margin:0}
+
+/* news broadsheet */
+.t-news{background:#fff;color:#121212}
+.n-top{display:flex;justify-content:space-between;font:9px Arial,sans-serif;color:#555;padding:4px 10px 2px}
+.n-mast{font:400 29px/1 "UnifrakturMaguntia",Georgia,serif;text-align:center;padding:2px 0 5px}
+.n-nav{display:flex;gap:11px;justify-content:center;font:700 9.5px Arial,sans-serif;text-transform:uppercase;border-top:2px solid #121212;border-bottom:1px solid #121212;padding:4px 0;letter-spacing:.3px}
+.n-live{background:#fff3f3;font:10px Arial,sans-serif;padding:4px 10px;color:#333;border-bottom:1px solid #f0d6d6}
+.n-live b{background:#c8102e;color:#fff;padding:1px 4px;margin-right:6px;font-size:9px}
+.n-body{padding:7px 12px}
+.kicker{font:700 9px Arial,sans-serif;color:#c8102e;letter-spacing:1px}
+.n-body h1{font:700 19px/1.15 Georgia,"Times New Roman",serif;margin:2px 0 4px}
+.by{font:9.5px Arial,sans-serif;color:#555;margin-bottom:6px}
+.n-body figcaption{font:8.5px/1.3 Arial,sans-serif;color:#707070;padding:3px 0 7px}
+.n-body p{font:11.5px/1.5 Georgia,serif;margin-bottom:6px;color:#222}
+.dc::first-letter{float:left;font:700 36px/.85 Georgia,serif;padding:3px 4px 0 0}
+.mostread h3{font:700 11px Arial,sans-serif;border-top:3px solid #121212;padding-top:4px;margin-top:4px}
+.mostread ol{padding-left:16px;font:10.5px/1.45 Georgia,serif}
+
+/* recipe blog */
+.t-rec{background:#fffdf8;color:#3d3027}
+.r-head{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;background:#fbe9e7;border-bottom:1px solid #f3cfc9}
+.r-logo{font:italic 700 19px Georgia,serif;color:#c2185b}
+.r-menu{font-size:16px;color:#8d6e63}
+.r-nav{font:10px Arial,sans-serif;color:#8d6e63;padding:5px 12px;border-bottom:1px dashed #e0c9bd;text-align:center}
+.r-body{padding:7px 12px}
+.r-crumb{font:9px Arial,sans-serif;color:#a1887f}
+.r-body h1{font:700 17px/1.2 Georgia,serif;margin:3px 0 4px}
+.r-meta{font:10px Arial,sans-serif}
+.stars{color:#f5a623;letter-spacing:-1px}
+.r-btn{display:inline-block;background:#c2185b;color:#fff;font:700 9px Arial,sans-serif;padding:2px 7px;border-radius:2px}
+.r-by{font:italic 9px Arial,sans-serif;color:#9e8b80;margin:4px 0 6px}
+.t-rec figure{border:4px solid #fff;box-shadow:0 1px 3px #0002;margin-bottom:7px}
+.r-body p{font:11px/1.55 Georgia,serif;margin-bottom:6px}
+.r-body h2{font:700 13px Georgia,serif;color:#c2185b;margin:4px 0 3px}
+.r-body ul{font:10.5px/1.5 Georgia,serif;padding-left:16px;margin-bottom:6px}
+.r-card{border:1px solid #ecd9cf;background:#fff;padding:6px 8px;font:10px/1.5 Arial,sans-serif}
+
+/* old-school forum */
+.t-forum{background:#e9ecf2;font:10px Verdana,Tahoma,Geneva,sans-serif;color:#222;height:100%}
+.f-head{background:linear-gradient(#6a89c0,#36578a);color:#fff;padding:6px 8px;font:bold 16px Tahoma,Verdana,sans-serif;text-shadow:1px 1px 0 #1d3557}
+.f-head small{display:block;font:9px Verdana,sans-serif;color:#dfe8f7;text-shadow:none}
+.f-nav{background:#c9d4e8;border-bottom:1px solid #9aabc8;padding:3px 8px;font-size:9px;color:#23406e}
+.f-crumb{padding:4px 8px;font-size:9px;color:#23406e;text-decoration:underline}
+.f-thread{margin:0 6px;background:linear-gradient(#4f6fa6,#36578a);color:#fff;font-weight:bold;padding:4px 6px;font-size:10px;border:1px solid #23406e}
+.f-post{margin:5px 6px 0;border:1px solid #9aabc8;background:#f5f7fb}
+.f-meta{background:#d5deef;padding:2px 6px;font-size:8.5px;color:#36578a;display:flex;justify-content:space-between;border-bottom:1px solid #9aabc8}
+.f-row{display:flex}
+.f-user{width:84px;flex:none;padding:5px;border-right:1px solid #c9d4e8;font-size:8px;color:#555;display:flex;flex-direction:column;gap:1px}
+.f-user b{color:#23406e;font-size:9.5px;text-decoration:underline}
+.f-av{width:38px;height:38px;background:#fff;border:1px solid #9aabc8;margin-bottom:3px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.f-text{flex:1;padding:6px;font-size:10px;line-height:1.45}
+.f-quote{border:1px inset #bbb;background:#fff;padding:3px 5px;margin-bottom:4px;font-size:9px}
+.f-quote i{display:block;color:#777;font-size:8px}
+.f-sig{margin-top:6px;border-top:1px solid #ccc;padding-top:3px;font-size:8.5px;color:#888}
+
+/* bargain shop product page */
+.t-shop{background:#fff;font:10px Arial,Helvetica,sans-serif;color:#111}
+.s-head{background:#1e3a5f;display:flex;align-items:center;gap:8px;padding:6px 8px;color:#fff}
+.s-logo{font:700 16px Arial,sans-serif;color:#ffb347;letter-spacing:-.5px}
+.s-search{flex:1;background:#fff;color:#999;border-radius:3px;padding:4px 6px;font-size:9.5px}
+.s-cart{font-size:15px}.s-cart sup{color:#ffb347;font:700 10px Arial}
+.s-deal{background:#ffe066;font-weight:700;font-size:10px;padding:4px 8px;text-align:center;color:#7a2d00}
+.s-crumb{font-size:9px;color:#555;padding:5px 8px}
+.s-img{margin:0 8px;border:1px solid #eee}
+.t-shop h1{font:400 13px/1.3 Arial,sans-serif;margin:6px 8px 3px}
+.s-stars{color:#e4a000;margin:0 8px;font-size:10px}
+.s-stars u{color:#1a5fb4}
+.s-price{margin:5px 8px;font-size:10px;color:#555}
+.s-price .now{font-size:21px;color:#b12704}
+.s-price .save{background:#cc0c39;color:#fff;padding:1px 4px;border-radius:2px;font-size:9px}
+.s-stock{color:#c45500;margin:0 8px 5px;font-size:10px}
+.s-btns{margin:0 8px;display:flex;gap:6px}
+.s-btns span{flex:1;text-align:center;padding:6px;border-radius:3px;font-size:10.5px;border:1px solid #c8a33a}
+.s-add{background:#ffcf40}.s-buy{background:#ff9f43;border-color:#c8792a!important}
+.s-bul{margin:8px;padding-left:14px;font-size:9.5px;line-height:1.5}
+
+/* tech review blog */
+.t-tech{background:#fff;color:#1b1b1f;font:11px/1.5 -apple-system,"Segoe UI",Arial,sans-serif}
+.g-head{background:#111;color:#aaa;display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:9px}
+.g-logo{font:800 17px Arial,sans-serif;color:#fff;letter-spacing:-.5px}
+.g-logo b{color:#00c2a8}
+.g-body{padding:8px 12px}
+.g-tag{display:inline-block;background:#00c2a8;color:#00140f;font:700 8.5px Arial,sans-serif;padding:1px 5px;letter-spacing:.5px}
+.g-body h1{font:800 19px/1.15 Arial,sans-serif;margin:4px 0 6px;letter-spacing:-.3px}
+.g-auth{display:flex;gap:6px;align-items:center;font-size:9px;line-height:1.3;color:#666;margin-bottom:6px}
+.g-auth b{color:#111}
+.g-av{width:24px;height:24px;border-radius:50%;background:radial-gradient(circle at 50% 38%,#8a6249 0 30%,#5b3f30 31% 100%);flex:none}
+.t-tech figure{margin-bottom:7px}
+.g-body h2{font:800 13px Arial,sans-serif;margin:6px 0 2px}
+.g-body p{margin-bottom:5px}
+.g-verdict{border-left:3px solid #00c2a8;background:#f2fbfa;padding:5px 8px;font-size:10px}
+.s-rev{margin:8px;border-top:1px solid #ddd;padding-top:6px}
+.s-rev h3{font:700 12px Arial,sans-serif;margin-bottom:4px}
+.s-r{font-size:9.5px;line-height:1.4;margin-bottom:6px;color:#222}
+.s-r b{display:block;font-size:10px;color:#111}.s-r b::first-line{color:#e4a000}
+.s-r span{display:block;font-size:8.5px;color:#777}
+.g-rel{margin-top:6px;border-top:1px solid #eee;padding-top:5px;font-size:9.5px;color:#555}
+.g-rel b{color:#00a693}

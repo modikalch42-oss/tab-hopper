@@ -6,7 +6,8 @@
 <title>Tab-Hopper</title>
 <meta name="description" content="A daily browser-physics puzzle: rearrange the pop-ups into a ramp in 3 clicks.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Caveat:wght@600&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="sites.css">
 <style>
 :root{--ink:#1d1830;--muted:#6b6584;--accent:#ff4d6d;--blue:#3d6bff;--card:#fffaf2;--page:#fdfcff;--decor:#ece9f4}
 *{box-sizing:border-box}
@@ -28,78 +29,112 @@ h1 small{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999p
 .pips.deny{animation:deny .3s}
 @keyframes deny{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 
-/* fake browser */
-#browser{border-radius:16px;background:#e9e5f3;box-shadow:0 1px 0 #fff inset,0 12px 30px #2a1f5a26,0 0 0 1px #d5d0e3;overflow:hidden}
-.tabs{display:flex;align-items:flex-end;gap:6px;padding:8px 10px 0;height:36px}
-.lights{display:flex;gap:5px;margin-right:6px;align-self:center}
-.lights i{width:10px;height:10px;border-radius:50%;display:block}
+/* browser window (generic, light theme) */
+#browser{border-radius:10px;background:#dee1e6;box-shadow:0 0 0 1px #b9bcc2,0 14px 34px #1a1a2e33;overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.strip{display:flex;align-items:flex-end;height:34px;padding:0 6px 0 10px;gap:2px}
+.lights{display:flex;gap:6px;margin-right:8px;align-self:center}
+.lights i{width:11px;height:11px;border-radius:50%;display:block;box-shadow:inset 0 0 0 .5px #0002}
 .lights i:nth-child(1){background:#ff5f57}.lights i:nth-child(2){background:#febc2e}.lights i:nth-child(3){background:#28c840}
-.tab{background:var(--page);border-radius:9px 9px 0 0;padding:5px 10px;font-size:12px;display:flex;gap:6px;align-items:center;max-width:58%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#3b3552}
-.tab.ghost{background:transparent;color:#8a84a3;max-width:none}
-.bar{background:var(--page);padding:6px 10px;border-bottom:1px solid #ece8f5}
-.url{background:#f1eef8;border-radius:999px;padding:4px 12px;font-size:12px;color:#5d5778;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.url b{color:var(--ink);font-weight:600}
-#viewport{position:relative;width:100%;overflow:hidden;background:var(--page);touch-action:none;user-select:none;-webkit-user-select:none}
-#page{position:absolute;left:0;top:0;width:360px;height:560px;transform-origin:0 0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.tab{height:28px;display:flex;align-items:center;gap:6px;padding:0 8px;font-size:11.5px;color:#3c4043;min-width:0;white-space:nowrap}
+.tab .tt{overflow:hidden;text-overflow:ellipsis}
+.tab .fav{font-size:12px;flex:none}
+.tab .tx{font-size:10px;color:#5f6368;flex:none;margin-left:2px}
+.tab.on{background:#fff;border-radius:8px 8px 0 0;flex:0 1 62%;color:#202124;position:relative}
+.tab.off{flex:0 1 28%;color:#5f6368}
+.tab.off::before{content:"";position:absolute}
+.plus{color:#5f6368;font-size:17px;padding:0 6px 4px;align-self:center}
+.tools{display:flex;align-items:center;gap:4px;height:36px;background:#fff;padding:0 6px;border-bottom:1px solid #dadce0}
+.ic{width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex:none}
+.ic svg{width:15px;height:15px;stroke:#5f6368;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ic.dim svg{stroke:#c4c7c5}
+.omni{flex:1;min-width:0;height:26px;background:#f1f3f4;border-radius:13px;display:flex;align-items:center;gap:6px;padding:0 10px;font-size:12px;white-space:nowrap;overflow:hidden}
+.omni svg{width:11px;height:11px;flex:none;stroke:#5f6368;fill:none;stroke-width:2.4}
+.omni .host{color:#202124}.omni .path{color:#80868b;overflow:hidden;text-overflow:ellipsis}
+#viewport{position:relative;width:100%;overflow:hidden;background:#fff;touch-action:none;user-select:none;-webkit-user-select:none}
+#page{position:absolute;left:0;top:0;width:360px;height:560px;transform-origin:0 0;font-family:Arial,Helvetica,sans-serif}
 #fx{position:absolute;left:0;top:0;width:360px;height:560px;pointer-events:none;z-index:20}
 
-/* decorative page content (not solid) */
-.dc{position:absolute;background:var(--decor);border-radius:5px}
-.logo{position:absolute;left:58px;top:9px;font:700 15px/1 Fredoka,sans-serif;color:#cfc9df;letter-spacing:.2px}
-.nav{position:absolute;right:12px;top:11px;display:flex;gap:10px;font-size:11px;color:#cfc9df}
-.hr{position:absolute;left:0;right:0;top:32px;height:1px;background:#efecf6}
-
-/* goal */
-#goal{position:absolute;border-radius:12px 12px 6px 6px;background:linear-gradient(#fff,#f3fff6);border:2.5px solid #2bd67b;box-shadow:0 0 0 0 #2bd67b88,0 0 18px #2bd67b88;display:flex;flex-direction:column;align-items:center;justify-content:center;font:600 11px Fredoka,sans-serif;color:#159a52;animation:glow 1.6s ease-in-out infinite;z-index:1}
-#goal .flag{font-size:20px;line-height:1;transform-origin:20% 90%;animation:wave 1.2s ease-in-out infinite}
-@keyframes glow{50%{box-shadow:0 0 0 6px #2bd67b22,0 0 26px #2bd67bcc}}
+/* goal: a glowing tab you have to land the ball in */
+#goal{position:absolute;border-radius:9px 9px 3px 3px;background:#fff;border:2px solid #1e8e3e;box-shadow:0 0 0 0 #34a85366,0 0 16px #34a853aa;display:flex;flex-direction:column;align-items:center;justify-content:center;font:600 10.5px system-ui,sans-serif;color:#1e8e3e;animation:glow 1.6s ease-in-out infinite;z-index:1}
+#goal .flag{font-size:19px;line-height:1.1;transform-origin:20% 90%;animation:wave 1.2s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 0 0 5px #34a85322,0 0 24px #34a853dd}}
 @keyframes wave{50%{transform:rotate(-10deg)}}
-#goal.opened{animation:opened .6s cubic-bezier(.3,1.8,.5,1) forwards;background:#2bd67b;color:#fff}
+#goal.opened{animation:opened .6s cubic-bezier(.3,1.8,.5,1) forwards;background:#34a853;color:#fff}
 @keyframes opened{0%{transform:scale(1)}40%{transform:scale(1.3)}100%{transform:scale(1.1)}}
 
-/* elements */
+/* clutter: the solid stuff */
 .el{position:absolute;z-index:3}
 .el-in{width:100%;height:100%;position:relative;transition:transform .45s cubic-bezier(.25,1.9,.45,1)}
 .el.drag{z-index:15;cursor:grabbing}
-.el.drag .el-in{transition:none;filter:drop-shadow(0 12px 10px #0003)}
+.el.drag .el-in{transition:none;filter:drop-shadow(0 12px 10px #0004)}
 .draggable{cursor:grab}
 .el.drop .el-in{animation:drop .5s cubic-bezier(.3,1.7,.45,1)}
 @keyframes drop{0%{transform:scale(1.08)}35%{transform:scale(.94,1.04)}100%{transform:scale(1)}}
 .el.wob .el-in{animation:wob .35s ease-out}
 @keyframes wob{25%{transform:rotate(2.2deg) scale(1.02)}60%{transform:rotate(-1.4deg)}100%{transform:rotate(0)}}
 .el.back{transition:left .35s cubic-bezier(.3,1.6,.5,1),top .35s cubic-bezier(.3,1.6,.5,1)}
-
-.note .el-in{padding:3px 10px 0;font:600 17px/20px Caveat,cursive;color:#4a3b14;box-shadow:0 3px 6px #0002;border-radius:2px;white-space:nowrap;overflow:hidden}
-.note.h0 .el-in{background:#fff27a}.note.h1 .el-in{background:#ffb8d6}.note.h2 .el-in{background:#bff5ab}.note.h3 .el-in{background:#aee3ff}
-.note .el-in::before{content:"";position:absolute;left:50%;top:-6px;width:34px;height:11px;margin-left:-17px;background:#ffffffa8;transform:rotate(-3deg);box-shadow:0 1px 1px #0001}
-.toast .el-in{background:#232036;color:#fff;border-radius:10px;font-size:12.5px;display:flex;align-items:center;padding:0 12px;white-space:nowrap;box-shadow:0 6px 14px #0003}
-.sub .el-in{background:linear-gradient(#ff5b6e,#e8203e);color:#fff;border-radius:999px;font:700 13px/30px Fredoka,sans-serif;text-align:center;letter-spacing:1px;box-shadow:0 4px 0 #a3122a,0 6px 10px #0003}
-.sub.pressed .el-in{background:linear-gradient(#ff8fa0,#ff4060);box-shadow:0 1px 0 #a3122a,0 0 16px #ff4d6dbb;transform:translateY(3px);transition:none}
-.popup{z-index:4}
-.popup .el-in{background:#fff;border-radius:10px;box-shadow:0 10px 24px #2a1f5a33,0 0 0 1px #e3def0;overflow:hidden}
-.popup .tb{height:24px;background:linear-gradient(90deg,#3d6bff,#7b5cff);color:#fff;font-size:11.5px;font-weight:600;display:flex;align-items:center;padding:0 8px}
-.popup .bd{padding:8px 10px;font-size:12px;color:#3b3552}
-.popup .fake-in{margin-top:6px;height:18px;border:1px solid #ddd8ea;border-radius:5px;font-size:10px;color:#aaa;padding:1px 6px}
-.popup .fake-btn{margin-top:5px;display:inline-block;background:#3d6bff;color:#fff;border-radius:5px;font-size:10.5px;padding:2px 9px}
-.x-btn{position:absolute;right:4px;top:3px;width:18px;height:18px;border-radius:50%;border:0;background:#ffffff33;color:#fff;font:700 12px/18px system-ui;padding:0;cursor:pointer;z-index:2}
+.x-btn{position:absolute;right:3px;top:3px;width:17px;height:17px;border-radius:50%;border:0;background:transparent;color:#5f6368;font:400 15px/17px Arial,sans-serif;padding:0;cursor:pointer;z-index:2}
 .x-btn::after{content:"";position:absolute;inset:-9px}
+
+/* sticky note (a desktop note left on top of the browser) */
+.note .el-in{padding:3px 9px 0;font:600 17px/20px Caveat,cursive;color:#3b3214;border-radius:1px;white-space:nowrap;overflow:hidden;box-shadow:0 1px 1px #0002,2px 4px 6px #0002}
+.note.h0 .el-in{background:linear-gradient(#fff59a,#ffee6e)}.note.h1 .el-in{background:linear-gradient(#ffc7dd,#ffb0cf)}
+.note.h2 .el-in{background:linear-gradient(#d4f7c4,#bdeea8)}.note.h3 .el-in{background:linear-gradient(#cdeeff,#b2e2fb)}
+/* OS notification */
+.toast .el-in{background:#f6f6f8f2;border:1px solid #d8d8de;border-radius:7px;display:flex;align-items:center;gap:7px;padding:0 7px;box-shadow:0 4px 12px #0003;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;overflow:hidden}
+.toast .ti{width:20px;height:20px;border-radius:5px;background:#fff;box-shadow:0 0 0 1px #0001;display:flex;align-items:center;justify-content:center;font-size:12px;flex:none}
+.toast .tt2{font:600 9.5px/1.15 system-ui,sans-serif;color:#1d1d1f;white-space:nowrap}
+.toast .tb2{font:9px/1.15 system-ui,sans-serif;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toast .tw{min-width:0}
+/* subscribe button */
+.sub .el-in{background:#cc0000;color:#fff;border-radius:2px;font:500 12px/30px Roboto,Arial,sans-serif;text-align:center;letter-spacing:.6px;box-shadow:0 2px 0 #8a0000,0 3px 6px #0003}
+.sub .el-in i{font-style:normal;font-size:10px;margin-right:4px}
+.sub.pressed .el-in{background:#e62117;box-shadow:0 0 0 #8a0000,0 0 12px #ff000077;transform:translateY(2px);transition:none}
+/* newsletter / paywall modal */
+.popup{z-index:4}
+.popup .el-in{background:#fff;border:1px solid #cfcfcf;border-top:4px solid var(--brand,#b3001b);border-radius:2px;box-shadow:0 10px 28px #0000004d;padding:9px 10px 6px;font-family:Arial,Helvetica,sans-serif;overflow:hidden}
+.pp-h{font:700 12.5px/1.15 Georgia,serif;color:#111;padding-right:14px}
+.pp-b{font-size:9.5px;line-height:1.3;color:#444;margin-top:4px}
+.pp-f{display:flex;margin-top:6px;height:19px}
+.pp-in{flex:1;border:1px solid #bbb;border-right:0;font-size:8.5px;color:#999;padding:3px 4px;white-space:nowrap;overflow:hidden}
+.pp-cta{background:var(--brand,#b3001b);color:#fff;font:700 9px/19px Arial,sans-serif;padding:0 7px;white-space:nowrap}
+.pp-no{font-size:8.5px;color:#777;text-decoration:underline;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* sponsored ad */
 .ad{z-index:2}
-.ad .el-in{background:repeating-linear-gradient(45deg,#fff36b 0 10px,#ffe74a 10px 20px);border:2px solid #ff2d55;border-radius:6px;font:700 12px/1.15 system-ui;color:#c4002b;padding:14px 8px 4px;text-align:center;box-shadow:0 4px 0 #0002}
-.ad .tag{position:absolute;left:4px;top:2px;font-size:9px;background:#ff2d55;color:#fff;padding:0 4px;border-radius:3px}
-.ad .x-btn{background:#ff2d55;width:15px;height:15px;font-size:10px;line-height:15px;top:2px;right:2px}
+.ad .el-in{background:#fff;border:1px solid #e2e2e2;font-family:Arial,Helvetica,sans-serif;padding:13px 5px 4px;box-shadow:0 1px 3px #0001;overflow:hidden}
+.ad .al{position:absolute;left:5px;top:2px;font-size:7.5px;color:#999;letter-spacing:.4px;text-transform:uppercase}
+.ad .x-btn{width:13px;height:13px;top:1px;right:1px;font-size:11px;line-height:13px;color:#999;border-radius:0}
+.ad .ar{display:flex;gap:6px;height:100%}
+.ad .ath{width:44px;flex:none;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.ad .ah{font:700 10px/1.2 Arial,sans-serif;color:#1a0dab}
+.ad .as{font-size:8px;color:#888;margin-top:2px}
+/* cookie consent */
 .cookie{z-index:6}
-.cookie .el-in{background:#2b2540;color:#efeaff;display:flex;align-items:center;gap:8px;padding:0 10px;font-size:12px;box-shadow:0 -4px 14px #0002}
-.cookie .el-in span{flex:1}
-.accept{border:0;background:#ffd166;color:#2b2540;font:700 12px Fredoka,sans-serif;border-radius:8px;padding:7px 12px;cursor:pointer;box-shadow:0 3px 0 #c99a2e}
+.cookie .el-in{background:#fff;border-top:1px solid #ddd;box-shadow:0 -3px 14px #0000002e;display:flex;align-items:center;gap:8px;padding:0 8px;font-family:Arial,Helvetica,sans-serif}
+.ck-t{flex:1;font-size:8.5px;line-height:1.3;color:#444}
+.ck-t b{display:block;font-size:10px;color:#111}
+.ck-b{display:flex;flex-direction:column;gap:3px;flex:none}
+.ck-m{font-size:8.5px;color:#444;border:1px solid #888;padding:2px 6px;text-align:center}
+.accept{border:0;background:var(--brand,#b3001b);color:#fff;font:700 9.5px Arial,sans-serif;padding:5px 9px;cursor:pointer}
+/* support chat widget */
 .chat{z-index:7}
-.bubble{position:absolute;left:0;top:0;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#7b5cff,#5a3df0);box-shadow:0 6px 14px #5a3df055;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;z-index:2}
-.bubble::after{content:"1";position:absolute;right:-2px;top:-2px;background:#ff4d6d;color:#fff;font:700 10px/16px system-ui;width:16px;height:16px;border-radius:50%;text-align:center}
+.bubble{position:absolute;left:0;top:0;width:44px;height:44px;border-radius:50%;background:var(--brand,#5a3df0);box-shadow:0 4px 12px #0004;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2}
+.bubble svg{width:22px;height:22px;fill:#fff}
+.bubble::after{content:"1";position:absolute;right:-2px;top:-2px;background:#e8112d;color:#fff;font:700 9.5px/16px Arial;width:16px;height:16px;border-radius:50%;text-align:center;border:1.5px solid #fff}
 .chat.open .bubble::after{display:none}
-.panel{position:absolute;background:#fff;border-radius:12px;box-shadow:0 12px 30px #2a1f5a40,0 0 0 1px #e3def0;transform:scale(0);transform-origin:90% 100%;transition:transform .45s cubic-bezier(.3,1.6,.5,1);overflow:hidden;font-size:11.5px}
+.panel{position:absolute;background:#fff;border-radius:10px;box-shadow:0 10px 30px #0000004a,0 0 0 1px #e3e3e3;transform:scale(0);transform-origin:90% 100%;transition:transform .45s cubic-bezier(.3,1.6,.5,1);overflow:hidden;font:10px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif}
 .chat.open .panel{transform:scale(1)}
-.panel .ph{background:linear-gradient(90deg,#7b5cff,#5a3df0);color:#fff;padding:7px 10px;font-weight:600}
-.panel .msg{margin:7px 8px 0;padding:6px 8px;border-radius:9px;background:#f1eef8;color:#3b3552;max-width:85%}
-.panel .msg.me{margin-left:auto;background:#7b5cff;color:#fff}
+.panel .ph{background:var(--brand,#5a3df0);color:#fff;padding:8px 10px}
+.panel .ph b{display:block;font-size:11px}
+.panel .ph span{opacity:.85;font-size:9px}
+.panel .av{display:flex;margin-top:4px}.panel .av i{width:16px;height:16px;border-radius:50%;border:1.5px solid #fff;margin-right:-4px;background:#f0c9a8}
+.panel .av i:nth-child(2){background:#a8d0f0}.panel .av i:nth-child(3){background:#c9f0a8}
+.panel .msg{margin:7px 8px 0;padding:6px 8px;border-radius:9px;background:#f1f1f3;color:#222;max-width:88%}
+.panel .msg.me{margin-left:auto;background:var(--brand,#5a3df0);color:#fff}
+.panel .inp{position:absolute;left:8px;right:8px;bottom:7px;border:1px solid #ddd;border-radius:14px;padding:4px 8px;color:#aaa}
+/* reveal what's solid */
+#els.reveal .el-in,#els.reveal .bubble,#els.reveal .chat.open .panel{outline:2px dashed #ff1f6b;outline-offset:1px;animation:rv .6s ease-in-out infinite alternate}
+@keyframes rv{to{outline-color:#ff1f6b55}}
 
 .el.fold .el-in{animation:fold .32s cubic-bezier(.6,-.3,.7,.5) forwards;transform-origin:50% 0}
 @keyframes fold{0%{transform:scaleY(1)}30%{transform:scaleY(.55) skewX(-6deg)}55%{transform:scaleY(.35) skewX(5deg)}100%{transform:scaleY(0) scaleX(.2);opacity:0}}
@@ -136,7 +171,7 @@ footer{display:flex;justify-content:center;gap:16px;font-size:14px}
       <h1>Tab-Hopper <small id="num">#1</small></h1>
       <p class="sub">Get the ball into the glowing <b>Goal tab</b>. Drag, close or click the page clutter, <b>3 actions max</b>, then hit Launch.</p>
     </div>
-    <button class="icon-btn" id="mute" aria-label="Toggle sound">🔊</button>
+    <div style="display:flex;gap:6px"><button class="icon-btn" id="eye" aria-label="Show what's solid" title="Show what's solid">👁</button><button class="icon-btn" id="mute" aria-label="Toggle sound">🔊</button></div>
   </header>
 
   <div class="hud">
@@ -146,8 +181,16 @@ footer{display:flex;justify-content:center;gap:16px;font-size:14px}
   </div>
 
   <div id="browser">
-    <div class="tabs"><div class="lights"><i></i><i></i><i></i></div><div class="tab">📰 You won’t believe this page ✕</div><div class="tab ghost">＋</div></div>
-    <div class="bar"><div class="url">🔒 https://www.<b>totally-normal-website.biz</b>/article?id=<span id="urlid">1</span>&amp;popups=yes</div></div>
+    <div class="strip"><div class="lights"><i></i><i></i><i></i></div>
+      <div class="tab on"><span class="fav" id="fav">📰</span><span class="tt" id="tabTitle">…</span><span class="tx">✕</span></div>
+      <div class="tab off"><span class="fav">✉️</span><span class="tt">Inbox (3) - Mail</span></div><span class="plus">+</span></div>
+    <div class="tools">
+      <span class="ic"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></span>
+      <span class="ic dim"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      <span class="ic"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></span>
+      <div class="omni"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span class="host" id="host"></span><span class="path" id="path"></span></div>
+      <span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></span>
+    </div>
     <div id="viewport">
       <div id="page">
         <div id="decor"></div>
@@ -164,7 +207,7 @@ footer{display:flex;justify-content:center;gap:16px;font-size:14px}
     <button class="btn" id="reset">Reset</button>
     <button class="btn primary" id="launch">Launch 🚀</button>
   </div>
-  <p class="help">Only pop-ups, notes, toasts, buttons and widgets are solid. The grey page content is just scenery. Drag notes, toasts, buttons and pop-ups · ✕ closes · 🍪 Accept clears · 💬 toggles chat. Unlimited launches.</p>
+  <p class="help">The article itself isn’t solid, only the junk floating on top of it: pop-ups, ads, notes, notifications, the subscribe button and the chat widget (tap 👁 to highlight them). Drag notes, notifications, buttons and pop-ups · ✕ closes · <b>Accept</b> clears cookies · 💬 toggles chat. Unlimited launches.</p>
 
   <section id="result" hidden></section>
 
@@ -176,6 +219,7 @@ footer{display:flex;justify-content:center;gap:16px;font-size:14px}
 <div id="toast" role="status"></div>
 
 <script src="sim.js"></script>
+<script src="sites.js"></script>
 <script src="levels.js"></script>
 <script>
 (() => {
@@ -216,43 +260,45 @@ const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){retu
 /* ---------- layout ---------- */
 function fit(){scale=viewport.clientWidth/S.W;page.style.transform=`scale(${scale})`;viewport.style.height=(S.H*scale)+'px'}
 addEventListener('resize',fit);
+const SITES=window.TAB_SITES,ADS=window.TAB_ADS,TOASTS=window.TAB_TOASTS,NOTES=window.TAB_NOTES;
+let site=SITES[0];
 function decor(){
-  const d=[];const bar=(x,y,w,h=8)=>d.push(`<div class="dc" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px"></div>`);
-  bar(70,52,230,14);bar(70,72,170,14);
-  bar(14,104,332,120);
-  for(let i=0;i<7;i++)bar(14,240+i*16,i===6?190:332-(i*37%60));
-  bar(14,370,150,90);for(let i=0;i<5;i++)bar(176,372+i*17,170-(i*23%50));
-  for(let i=0;i<3;i++)bar(14,478+i*16,i===2?120:250-(i*30));
-  $('decor').innerHTML=`<div class="logo">the daily scroll</div><div class="nav"><span>News</span><span>Hot takes</span><span>Login</span></div><div class="hr"></div>`+d.join('');
+  site=SITES[idx%SITES.length];
+  $('decor').innerHTML=site.html;
+  $('fav').textContent=site.fav;$('tabTitle').textContent=site.tab;$('host').textContent=site.host;$('path').textContent=site.path;
+  document.title='Tab-Hopper';page.style.setProperty('--brand',site.color);
   const g=$('goal'),G=S.GOAL;g.style.left=G.x+'px';g.style.top=G.y+'px';g.style.width=G.w+'px';g.style.height=G.h+'px';
 }
 
 /* ---------- elements ---------- */
 const ang=e=>Math.atan2(e.s,e.c)*180/Math.PI;
+const esc=s=>String(s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+// cosmetic copy for each element, picked per site so no two match on a page (physics ignores this)
+function captions(){const n={};els.forEach(e=>{const k=n[e.t]=(n[e.t]||0);n[e.t]++;
+  if(e.t==='popup')e.d=site.popups[(k+idx)%site.popups.length];
+  else if(e.t==='ad')e.d=ADS[(k+idx*2)%ADS.length];
+  else if(e.t==='toast')e.d=TOASTS[(k+idx*3)%TOASTS.length];
+  else if(e.t==='note')e.d={txt:NOTES[(k*3+idx)%NOTES.length]};
+  else if(e.t==='sub')e.d=SUBS[k%SUBS.length]})}
+const SUBS=[{i:'🔔',t:'SUBSCRIBE'},{i:'＋',t:'FOLLOW'},{i:'✉',t:'SIGN UP'},{i:'♥',t:'DONATE'},{i:'★',t:'JOIN NOW'}];
+const CHAT_ICON='<svg viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4v-4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>';
 function elHTML(e){
-  const esc=s=>String(s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-  if(e.t==='note')return esc(e.txt);
-  if(e.t==='toast')return esc(e.txt);
-  if(e.t==='sub')return 'SUBSCRIBE';
-  if(e.t==='popup')return `<div class="tb">${esc(e.title)}</div><button class="x-btn" aria-label="Close">✕</button><div class="bd">${esc(e.txt)}<div class="fake-in">you@email.com</div><span class="fake-btn">Sign me up</span></div>`;
-  if(e.t==='ad')return `<span class="tag">AD</span><button class="x-btn" aria-label="Close ad">✕</button>${esc(e.txt)}`;
-  if(e.t==='cookie')return `<span>🍪 We use cookies to follow your every move.</span><button class="accept">Accept</button>`;
+  const d=e.d||{};
+  if(e.t==='note')return esc(d.txt);
+  if(e.t==='toast')return `<span class="ti">${d.i}</span><span class="tw"><div class="tt2">${esc(d.t)}</div><div class="tb2">${esc(d.b)}</div></span>`;
+  if(e.t==='sub')return `<i>${d.i}</i>${d.t}`;
+  if(e.t==='popup')return `<button class="x-btn" aria-label="Close">×</button><div class="pp-h">${esc(d.h)}</div><div class="pp-b">${esc(d.b)}</div><div class="pp-f"><span class="pp-in">Email address</span><span class="pp-cta">${esc(d.cta)}</span></div><div class="pp-no">${esc(d.no)}</div>`;
+  if(e.t==='ad')return `<span class="al">Advertisement</span><button class="x-btn" aria-label="Close ad">×</button><div class="ar"><span class="ath" style="background:${d.bg}">${d.th}</span><span><div class="ah">${esc(d.h)}</div><div class="as">${esc(d.s)} · Sponsored</div></span></div>`;
+  if(e.t==='cookie')return `<div class="ck-t"><b>We value your privacy</b>We and our 847 partners store and access information on your device to personalise ads, content and your entire personality.</div><div class="ck-b"><span class="ck-m">Manage options</span><button class="accept">Accept all</button></div>`;
   return '';
 }
-// cosmetic only: never show two identical captions on one page
-const ALT={note:['buy milk','call mum!!','drink water','ship it','fix bug #4','pw: hunter2','gym? lol','reply to Dave','TODO: sleep','water plants'],
-  toast:['✅ Saved!','🔔 3 new messages','🔋 Battery at 4%','📦 Your order shipped','⬇️ Download complete','🎉 You levelled up!','📅 Meeting in 5 min'],
-  ad:['You won’t BELIEVE this one weird trick','Congratulations! Visitor #1,000,000','Doctors HATE this ball','Local blob finds love','Hot singles… no wait, it’s soup','Download more RAM'],
-  popup:[['Newsletter','Get 10% off your first scroll!'],['Wait! Don’t go!','Join 2 million subscribers'],['Notifications','Allow us to ping you forever?'],['Survey','How was your 0.4s visit?'],['Sign in','Log in to see the rest of this sentence']]};
-function captions(){const seen=new Set();els.forEach(e=>{const key=e=>e.t+'|'+(e.title||'')+(e.txt||'');if(!ALT[e.t])return;
-  if(seen.has(key(e))){const alt=ALT[e.t].find(a=>!seen.has(e.t+'|'+(Array.isArray(a)?a.join(''):a)));if(alt){if(Array.isArray(alt)){e.title=alt[0];e.txt=alt[1]}else e.txt=alt}}seen.add(key(e))})}
 function build(){
   captions();elsBox.innerHTML='';views=[];
   els.forEach((e,i)=>{
     const v=document.createElement('div');v.dataset.i=i;
     if(e.t==='chat'){
       const P=S.PANEL;v.className='el chat'+(e.open?' open':'');
-      v.innerHTML=`<div class="panel" style="left:${22+P.dx-P.hw}px;top:${22+P.dy-P.hh}px;width:${2*P.hw}px;height:${2*P.hh}px"><div class="ph">Support 🤖</div><div class="msg">Hi! Need help? 👋</div><div class="msg">Hello??</div><div class="msg me">i'm just trying to read</div></div><div class="bubble">💬</div>`;
+      v.innerHTML=`<div class="panel" style="left:${22+P.dx-P.hw}px;top:${22+P.dy-P.hh}px;width:${2*P.hw}px;height:${2*P.hh}px"><div class="ph"><b>${esc(site.chat.name)}</b><span>We typically reply in a few minutes</span><div class="av"><i></i><i></i><i></i></div></div><div class="msg">${esc(site.chat.msg)}</div><div class="msg me">i'm just trying to read</div><div class="inp">Write a reply…</div></div><div class="bubble">${CHAT_ICON}</div>`;
       v.style.left=(e.x-22)+'px';v.style.top=(e.y-22)+'px';v.style.width='44px';v.style.height='44px';
     }else{
       v.className=`el ${e.t}${DRAGGABLE.has(e.t)?' draggable':''}${e.t==='note'?' h'+(e.hue||0):''}`;
@@ -262,12 +308,14 @@ function build(){
     elsBox.appendChild(v);views[i]=v;
   });
 }
+let revealOn=false,revealT;
+function flashSolid(ms=1500){elsBox.classList.add('reveal');clearTimeout(revealT);revealT=setTimeout(()=>{if(!revealOn)elsBox.classList.remove('reveal')},ms)}
 function place(v,e){v.style.left=(e.x-e.w/2)+'px';v.style.top=(e.y-e.h/2)+'px';v.style.width=e.w+'px';v.style.height=e.h+'px';v.style.transform=e.c===1?'':`rotate(${ang(e).toFixed(2)}deg)`}
 function retrigger(v,cls){v.classList.remove(cls);void v.offsetWidth;v.classList.add(cls)}
 
 function load(newMode,i){
   mode=newMode;idx=i;level=LEVELS[idx];
-  $('num').textContent=mode==='daily'?'#'+num:'Practice';$('urlid').textContent=idx+1;$('par').textContent=level.par;
+  $('num').textContent=mode==='daily'?'#'+num:'Practice';$('par').textContent=level.par;decor();
   $('daily').hidden=mode==='daily';
   reset(true);
   const best=mode==='daily'&&store.get('th-best-'+num);
@@ -277,7 +325,7 @@ function reset(hard){
   els=level.els.map(e=>({...e}));used=0;history=[];won=false;running=false;
   if(hard)launches=0;
   $('result').hidden=true;$('goal').classList.remove('opened');
-  build();hud();status('');ball={x:S.START.x,y:S.START.y};trail=[];particles=[];
+  build();hud();status('');ball={x:S.START.x,y:S.START.y};trail=[];particles=[];flashSolid();
 }
 function hud(){
   [...$('pips').children].forEach((p,i)=>p.classList.toggle('used',i<used));
@@ -406,10 +454,11 @@ $('launch').onclick=launch;
 $('reset').onclick=()=>{if(!running){reset(false);sfx.thwip()}};
 $('practice').onclick=()=>{let i;do{i=Math.floor(Math.random()*LEVELS.length)}while(LEVELS.length>1&&i===(num-1)%LEVELS.length);load('practice',i)};
 $('daily').onclick=()=>load('daily',((num-1)%LEVELS.length+LEVELS.length)%LEVELS.length);
+$('eye').onclick=()=>{revealOn=!revealOn;elsBox.classList.toggle('reveal',revealOn);$('eye').style.background=revealOn?'#ffe0ea':''};
 const mb=$('mute');mb.textContent=muted?'🔇':'🔊';
 mb.onclick=()=>{muted=!muted;mb.textContent=muted?'🔇':'🔊';try{localStorage.setItem('th-muted',muted?'1':'0')}catch(e){}};
 
-decor();fit();
+fit();
 if(!LEVELS.length){status('levels.js is missing','bad')}
 else{const q=parseInt(new URLSearchParams(location.search).get('level'),10);
   if(q>=1&&q<=LEVELS.length)load('practice',q-1);else load('daily',((num-1)%LEVELS.length+LEVELS.length)%LEVELS.length)}

@@ -1,8 +1,10 @@
 # Tab-Hopper
 
+Each level takes place on one of five convincing fake websites (`sites.js` / `sites.css`): a broadsheet news site, a recipe blog, an old-school forum, a bargain-shop product page and a gadget review blog. All names and brands are invented. Only the clutter floating on top is solid; the 👁 button highlights it.
+
 A daily browser-physics puzzle. A ball sits at the top-left of a cluttered fake webpage, and a glowing Goal tab waits at the bottom-right. You get **3 actions** (drag a note, toast, button or pop-up; close a pop-up or ad; accept the cookie banner; toggle the chat widget) to turn the clutter into a ramp, then hit **Launch**.
 
-- **Play:** open `index.html` (it loads `sim.js` and `levels.js` from the same folder). Works on GitHub Pages. `?level=N` opens a specific page for practice.
+- **Play:** open `index.html` (it loads `sim.js`, `levels.js`, `sites.js` and `sites.css` from the same folder). Works on GitHub Pages. `?level=N` opens a specific page for practice.
 - **Physics:** `sim.js` is a small fixed-timestep engine that uses only arithmetic and square roots, so every browser and the level generator compute the same ball path.
 - **Levels:** `tools/generate.js` builds `levels.js` (365 daily pages). For each one it:
   1. finds a layout where 2–3 elements carry the ball into the goal, every one of them is needed, and the solution still works with any piece nudged 4 px;
