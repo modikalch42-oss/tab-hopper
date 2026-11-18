@@ -99,3 +99,15 @@
 .g-verdict{border:2px solid var(--ink);background:#e6fff4;padding:4px 7px;font-size:8px;box-shadow:2px 2px 0 var(--ink)}
 .g-rel{margin-top:6px;border-top:2px solid var(--ink);padding-top:4px;font-size:7.5px}
 .g-rel b{color:var(--ink);background:var(--mint);padding:0 3px}
+
+/* landscape (desktop / iPad) page: wider column, images beside the text */
+#decor.land figure{float:right;width:47%;margin:2px 0 6px 12px}
+#decor.land .s-img{float:left;width:42%;margin:0 12px 6px 8px}
+#decor.land h1{font-size:21px}
+#decor.land p{font-size:9.5px}
+#decor.land .mostread,#decor.land .r-card,#decor.land .g-verdict,#decor.land .s-rev,#decor.land .g-rel{clear:both}
+#decor.land .n-nav{gap:16px}
+#decor.land .f-user{width:120px}
+#decor.land .f-post{margin:6px 12px 0}
+#decor.land .f-thread{margin:0 12px}
+#decor.land .t-shop h1{margin-top:8px}

@@ -1,10 +1,15 @@
 /* Tab-Hopper physics. Deterministic: only + - * / and Math.sqrt are used in the
    simulation, so the same level gives the same ball path in every browser and in
-   the level generator (tools/generate.js). Element angles are stored as cos/sin. */
+   the level generator (tools/generate.js). Element angles are stored as cos/sin.
+
+   Two worlds: a portrait page for phones and a landscape page for desktop/iPad.
+   Each has its own level set (levels.js / levels-land.js). */
 (function (root) {
-  const W = 360, H = 560, R = 9, G = 1150, DT = 1 / 240, MAX_STEPS = 240 * 12;
-  const START = { x: 30, y: 44 }, LAUNCH = { vx: 150, vy: -140 };
-  const GOAL = { x: 298, y: 498, w: 58, h: 52 };
+  const R = 9, G = 1150, DT = 1 / 240, MAX_STEPS = 240 * 12;
+  const WORLDS = {
+    portrait: { name: 'portrait', W: 360, H: 560, START: { x: 30, y: 44 }, LAUNCH: { vx: 150, vy: -140 }, GOAL: { x: 298, y: 498, w: 58, h: 52 } },
+    landscape: { name: 'landscape', W: 640, H: 400, START: { x: 30, y: 44 }, LAUNCH: { vx: 230, vy: -150 }, GOAL: { x: 578, y: 338, w: 58, h: 52 } }
+  };
   // e = bounciness, mu = sliding friction per contact step, kick = minimum bounce-off speed
   const SPEC = {
     note: { e: .25, mu: .002 }, toast: { e: .3, mu: .003 }, sub: { e: 1, mu: 0, kick: 440 },
@@ -26,11 +31,11 @@
     return out;
   }
 
-  // coins: [[x,y],...]. The goal only counts once every coin has been collected in this run.
-  function start(els, coins) {
-    coins = coins || [];
-    return { x: START.x, y: START.y, vx: LAUNCH.vx, vy: LAUNCH.vy, n: 0, slow: 0, cols: colliders(els), done: null, hits: [],
-      coins, got: 0, all: (1 << coins.length) - 1, gotNow: [], inGoal: false, triedGoal: false };
+  // coins: [[x,y],...]. Reaching the goal ends the run with whatever coins were collected (s.got bitmask).
+  function start(els, coins, wd) {
+    wd = wd || WORLDS.portrait; coins = coins || [];
+    return { wd, x: wd.START.x, y: wd.START.y, vx: wd.LAUNCH.vx, vy: wd.LAUNCH.vy, n: 0, slow: 0, cols: colliders(els), done: null, hits: [],
+      coins, got: 0, all: (1 << coins.length) - 1, gotNow: [] };
   }
 
   function resolve(s, col, wx, wy, pen) {
@@ -47,7 +52,8 @@
   }
 
   function step(s) {
-    s.hits = [];
+    const wd = s.wd, W = wd.W, H = wd.H, GOAL = wd.GOAL;
+    s.hits = []; s.gotNow = [];
     s.vy += G * DT; s.x += s.vx * DT; s.y += s.vy * DT;
     if (s.x < R) { s.x = R; if (s.vx < 0) s.vx = -s.vx * .5; }
     if (s.x > W - R) { s.x = W - R; if (s.vx > 0) s.vx = -s.vx * .5; }
@@ -73,16 +79,13 @@
       }
       resolve(s, c, nlx * c.c - nly * c.s, nlx * c.s + nly * c.c, pen);
     }
-    s.gotNow = [];
     for (let i = 0; i < s.coins.length; i++) {
       if (s.got >> i & 1) continue;
       const cx = s.x - s.coins[i][0], cy = s.y - s.coins[i][1];
       if (cx * cx + cy * cy < (R + CR) * (R + CR)) { s.got |= 1 << i; s.gotNow.push(i); }
     }
     s.n++;
-    s.inGoal = s.x > GOAL.x && s.x < GOAL.x + GOAL.w && s.y > GOAL.y && s.y < GOAL.y + GOAL.h;
-    if (s.inGoal && s.got === s.all) s.done = 'win';
-    else if (s.inGoal) { s.triedGoal = true; if (s.y > H + 2 * R) s.done = 'fell'; else if (s.n >= MAX_STEPS) s.done = 'timeout'; }
+    if (s.x > GOAL.x && s.x < GOAL.x + GOAL.w && s.y > GOAL.y && s.y < GOAL.y + GOAL.h) s.done = 'win';
     else if (s.y > H + 2 * R) s.done = 'fell';
     else if (s.n >= MAX_STEPS) s.done = 'timeout';
     else {
@@ -91,12 +94,13 @@
     return s;
   }
 
-  function run(els, keepPath, coins) {
-    const s = start(els, coins), touched = new Set(), path = [];
+  function run(els, keepPath, coins, wd) {
+    const s = start(els, coins, wd), touched = new Set(), path = [];
     while (!s.done) { step(s); for (const h of s.hits) touched.add(h.id); if (keepPath && s.n % 6 === 0) path.push([s.x, s.y]); }
-    return { res: s.done, touched, path, steps: s.n, got: s.got };
+    return { res: s.done, touched, path, steps: s.n, got: s.got, all: s.all };
   }
 
-  const api = { W, H, R, CR, DT, START, LAUNCH, GOAL, PANEL, CHAT_R, SPEC, colliders, start, step, run };
+  const P = WORLDS.portrait;
+  const api = { W: P.W, H: P.H, START: P.START, LAUNCH: P.LAUNCH, GOAL: P.GOAL, WORLDS, R, CR, DT, PANEL, CHAT_R, SPEC, colliders, start, step, run };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.TabSim = api;
 })(this);

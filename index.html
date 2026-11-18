@@ -236,7 +236,7 @@ button{font:inherit;color:inherit}
     <div class="row1"><span>TODAY'S PAGE</span><button class="lnk" id="howBtn">HOW TO PLAY ↗</button></div>
     <div class="siterow"><span class="fav" id="hFav"></span><span class="host" id="hHost">…</span><span class="par" id="hPar">PAR –</span></div>
     <button class="cta" id="openBtn">▶ OPEN TODAY'S PAGE</button>
-    <div class="fine">6 MOVES · GRAB EVERY COIN · THEN HOP THE TAB</div>
+    <div class="fine">6 MOVES · COINS = POINTS · FINISH IN THE NEW TAB</div>
     <div class="row2"><button class="ghost" id="practiceBtn">PRACTICE ∞</button><button class="ghost" id="readmeBtn">README.TXT</button></div>
   </div>
 </section>
@@ -246,7 +246,7 @@ button{font:inherit;color:inherit}
     <div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="url"><span id="lock"></span><span class="host" id="host"></span><span class="path" id="path"></span></span><span class="coinct" id="coinCt"></span></div>
     <div id="viewport"><div id="page">
       <div id="decor"></div>
-      <div id="goal" class="locked"><span id="goalIco"></span><span id="goalTxt">NEW TAB</span></div>
+      <div id="goal"><span id="goalIco"></span><span id="goalTxt">NEW TAB</span></div>
       <div id="els"></div>
       <canvas id="fx" width="180" height="280"></canvas>
     </div></div>
@@ -265,14 +265,19 @@ button{font:inherit;color:inherit}
 <script src="sim.js"></script>
 <script src="sites.js"></script>
 <script src="levels.js"></script>
+<script src="levels-land.js"></script>
 <script>
 (() => {
-const S=window.TabSim,LEVELS=window.TAB_LEVELS||[],SITES=window.TAB_SITES,ADS=window.TAB_ADS,TOASTS=window.TAB_TOASTS,NOTES=window.TAB_NOTES;
+const S=window.TabSim,QS=new URLSearchParams(location.search);
+// phones get the portrait page, desktops and tablets the landscape one (decided by screen size, so rotating mid-game doesn't swap puzzles)
+const LAYOUT=QS.get('layout')==='portrait'||QS.get('layout')==='landscape'?QS.get('layout'):(Math.min(screen.width,screen.height)>=600?'landscape':'portrait');
+const LAND=LAYOUT==='landscape',WD=S.WORLDS[LAYOUT],LEVELS=(LAND?window.TAB_LEVELS_LAND:window.TAB_LEVELS)||[],SITES=window.TAB_SITES,ADS=window.TAB_ADS,TOASTS=window.TAB_TOASTS,NOTES=window.TAB_NOTES;
 const $=id=>document.getElementById(id);
 const INK='#17131f',PAPER='#fbf8f1',LINK='#2b44ff',VISITED='#6a2bd9',HOT='#ff4f8b',SUN='#ffd23f',MINT='#2fd39a';
 const ACC={news:LINK,recipe:HOT,forum:VISITED,shop:'#ff8a00',tech:MINT};
 const viewport=$('viewport'),page=$('page'),elsBox=$('els'),cv=$('fx'),ctx=cv.getContext('2d');
-ctx.imageSmoothingEnabled=false;
+cv.width=WD.W/2;cv.height=WD.H/2;ctx.imageSmoothingEnabled=false;
+page.style.width=cv.style.width=WD.W+'px';page.style.height=cv.style.height=WD.H+'px';$('decor').classList.toggle('land',LAND);
 const MAX_ACTIONS=6,DRAGGABLE=new Set(['note','toast','sub','popup']);
 const ICON={note:'🗒️',toast:'🔔',sub:'🔴',popup:'🪟',close:'❌',cookie:'🍪',chat:'💬'};
 
@@ -335,14 +340,14 @@ const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){retu
 function show(id){$('home').hidden=id!=='home';$('game').hidden=id!=='game';$('menu').hidden=true;if(id==='game')fit();else $('topNum').textContent=DAYTXT;scrollTo(0,0)}
 function homeCard(){const s=SITES[dailyIdx%SITES.length],L=LEVELS[dailyIdx];
   $('hFav').style.background=ACC[s.id];$('hHost').textContent=s.host;$('hPar').textContent=(L?L.coins.length:'–')+' COINS';
-  const best=store.get('th2-best-'+num);$('openBtn').textContent=best?'▶ REPLAY TODAY\'S PAGE':'▶ OPEN TODAY\'S PAGE'}
+  const best=store.get(BEST+num);$('openBtn').textContent=best?'▶ REPLAY TODAY\'S PAGE':'▶ OPEN TODAY\'S PAGE'}
 
 /* ---------- the website inside the window ---------- */
 function decor(){
   site=SITES[idx%SITES.length];const acc=ACC[site.id];
   $('decor').innerHTML=site.html;page.style.setProperty('--acc',acc);$('bwin').style.setProperty('--acc',acc);$('modal').style.setProperty('--acc',acc);
   $('host').textContent=site.host;$('path').textContent=site.path;
-  const g=$('goal'),G=S.GOAL;g.style.left=G.x+'px';g.style.top=G.y+'px';g.style.width=G.w+'px';g.style.height=G.h+'px';
+  const g=$('goal'),G=WD.GOAL;g.style.left=G.x+'px';g.style.top=G.y+'px';g.style.width=G.w+'px';g.style.height=G.h+'px';
   dither(acc);
 }
 // redraw the site's illustrations as small ordered-dither pixel images in the site palette
@@ -356,11 +361,11 @@ function dither(acc){const pal=[INK,PAPER,acc,SUN,'#b9b2cc',HOT].map(rgb);
     img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(svg))})}
 function fit(){
   if($('game').hidden)return;
-  const availW=Math.min(innerWidth-28,560),availH=innerHeight-48-32-24-62-24-34;
-  scale=Math.max(.5,Math.min(availW/S.W,availH/S.H));
-  const w=Math.round(S.W*scale),h=Math.round(S.H*scale);
+  const availW=Math.min(innerWidth-28,LAND?1100:560),availH=innerHeight-48-32-24-62-24-34;
+  scale=Math.max(.5,Math.min(availW/WD.W,availH/WD.H));
+  const w=Math.round(WD.W*scale),h=Math.round(WD.H*scale);
   viewport.style.width=w+'px';viewport.style.height=h+'px';page.style.transform=`scale(${scale})`;
-  $('bwin').style.width=(w+4)+'px';$('dock').style.width=Math.min(innerWidth-24,Math.max(w+4,340))+'px';
+  $('bwin').style.width=(w+4)+'px';$('dock').style.width=Math.min(innerWidth-24,Math.max(Math.min(w+4,560),340))+'px';
 }
 addEventListener('resize',fit);
 
@@ -410,15 +415,15 @@ function flashSolid(ms=1400){elsBox.classList.add('reveal');clearTimeout(revealT
 function load(newMode,i){
   mode=newMode;idx=i;level=LEVELS[idx];show('game');decor();
   $('modal').hidden=true;reset(true);
-  const best=mode==='daily'&&store.get('th2-best-'+num);
+  const best=mode==='daily'&&store.get(BEST+num);
   if(best)setTimeout(()=>showResult(best,true),350);
   else if(!store.get('th-readme'))setTimeout(readme,250);
 }
 function reset(hard){
   els=level.els.map(e=>({...e}));used=0;history=[];won=false;running=false;
-  if(hard){launches=0;runs=[]}
+  if(hard){launches=0;runs=[];best=-1}
   $('goal').classList.remove('opened');gotMask=0;lockGoal(true);coinCt();
-  build();hud();ball={x:S.START.x,y:S.START.y};trail=[];particles=[];status('');flashSolid();
+  build();hud();ball={x:WD.START.x,y:WD.START.y};trail=[];particles=[];status('');flashSolid();
 }
 const CUR_ON=pix(P.cursor,ink),CUR_OFF=pix(P.cursor,ink,'px used');
 const FLAGI=pix(P.flag,{'#':INK,p:HOT}),LOCKI=pix(P.lock,{'#':'#5d5670'}),COINI=pix(P.coin,{'#':INK,y:SUN});
@@ -429,7 +434,7 @@ function hud(){
   $('topNum').textContent=mode==='practice'&&!$('game').hidden?'PRACTICE PAGE':DAYTXT;
   $('launch').disabled=running||won;$('reset').disabled=running;
 }
-function lockGoal(locked){$('goal').classList.toggle('locked',locked);$('goalIco').innerHTML=locked?LOCKI:FLAGI;$('goalTxt').textContent=locked?(level?level.coins.length:0)+' COINS':'NEW TAB'}
+function lockGoal(){$('goalIco').innerHTML=FLAGI;$('goalTxt').textContent='NEW TAB'}
 function coinCt(pop){const c=$('coinCt');c.innerHTML=COINI+`${pc(gotMask)}/${level?level.coins.length:0}`;if(pop)retrigger(c,'pop')}
 function status(t,cls){$('status').innerHTML=t?`<span class="${cls||''}">${esc(t)}</span>`:''}
 function spend(icon){used++;history.push(icon);hud();status('')}
@@ -437,7 +442,7 @@ function canAct(){if(running||won)return false;if(used>=MAX_ACTIONS){retrigger($
 
 /* ---------- input ---------- */
 function toPage(e){const r=page.getBoundingClientRect();return[(e.clientX-r.left)/scale,(e.clientY-r.top)/scale]}
-const START_BOX={x:S.START.x-18,y:S.START.y-18,w:36,h:36};
+const START_BOX={x:WD.START.x-18,y:WD.START.y-18,w:36,h:36};
 function ext(e){const hw=e.w/2,hh=e.h/2,c=Math.abs(e.c),s=Math.abs(e.s);return[hw*c+hh*s,hw*s+hh*c]}
 function hitsBox(e,b,p){const[ex,ey]=ext(e);return e.x+ex>b.x-p&&e.x-ex<b.x+b.w+p&&e.y+ey>b.y-p&&e.y-ey<b.y+b.h+p}
 let drag=null;
@@ -455,7 +460,7 @@ viewport.addEventListener('pointerdown',ev=>{
 });
 viewport.addEventListener('pointermove',ev=>{
   if(!drag)return;const p=toPage(ev),d=drag,e=d.e,[ex,ey]=ext(e);
-  e.x=Math.min(S.W-ex,Math.max(ex,p[0]+d.ox));e.y=Math.min(S.H-ey,Math.max(34+ey,p[1]+d.oy));
+  e.x=Math.min(WD.W-ex,Math.max(ex,p[0]+d.ox));e.y=Math.min(WD.H-ey,Math.max(34+ey,p[1]+d.oy));
   if(Math.hypot(e.x-d.x0,e.y-d.y0)>6)d.moved=true;
   const now=performance.now(),vx=(p[0]-d.lastX)/Math.max(8,now-d.lastT);d.lastX=p[0];d.lastT=now;
   d.tilt+=(Math.max(-12,Math.min(12,vx*22))-d.tilt)*.35;
@@ -465,7 +470,7 @@ function endDrag(){
   if(!drag)return;const d=drag,e=d.e,v=d.v;drag=null;
   v.classList.remove('drag');v.firstChild.style.transform='';
   if(!d.moved){e.x=d.x0;e.y=d.y0;place(v,e);return}
-  if(hitsBox(e,START_BOX,6)||hitsBox(e,S.GOAL,4)){
+  if(hitsBox(e,START_BOX,6)||hitsBox(e,WD.GOAL,4)){
     e.x=d.x0;e.y=d.y0;v.classList.add('back');place(v,e);sfx.deny();status("Can't cover the ball or the new tab");return}
   e.x=Math.round(e.x*10)/10;e.y=Math.round(e.y*10)/10;place(v,e);
   retrigger(v,'drop');sfx.drop();spend(ICON[e.t]);
@@ -478,18 +483,18 @@ const BALL=(()=>{const c=document.createElement('canvas');c.width=c.height=11;co
 const COINF=[4.6,3.4,1.4,3.4].map(a=>{const c=document.createElement('canvas');c.width=c.height=9;const x=c.getContext('2d');
   for(let j=0;j<9;j++)for(let i=0;i<9;i++){const u=(i-4)/a,v=(j-4)/4.6,d=u*u+v*v;if(d>1.05)continue;const edge=((i-4)/(a-1))**2+((j-4)/3.6)**2>1||a<2;
     x.fillStyle=edge?INK:(i===3&&j<=4&&a>3)?'#fff':SUN;x.fillRect(i,j,1,1)}return c});
-let ball={x:S.START.x,y:S.START.y},trail=[],particles=[],sim=null,acc=0,lastT=0,squash=0;
+let ball={x:WD.START.x,y:WD.START.y},trail=[],particles=[],sim=null,acc=0,lastT=0,squash=0;
 const H2=v=>Math.round(v/2);
 function draw(t){
-  ctx.clearRect(0,0,180,280);
+  ctx.clearRect(0,0,cv.width,cv.height);
   // launch pad under the start
-  ctx.fillStyle=INK;ctx.fillRect(H2(S.START.x)-6,H2(S.START.y)+6,13,2);ctx.fillRect(H2(S.START.x)-5,H2(S.START.y)+8,2,3);ctx.fillRect(H2(S.START.x)+3,H2(S.START.y)+8,2,3);
+  ctx.fillStyle=INK;ctx.fillRect(H2(WD.START.x)-6,H2(WD.START.y)+6,13,2);ctx.fillRect(H2(WD.START.x)-5,H2(WD.START.y)+8,2,3);ctx.fillRect(H2(WD.START.x)+3,H2(WD.START.y)+8,2,3);
   if(level)level.coins.forEach((c,i)=>{if(gotMask>>i&1)return;const f=COINF[Math.floor(t/130+i*1.7)%4];ctx.drawImage(f,H2(c[0])-4,H2(c[1])-4)});
   for(let k=0;k<trail.length;k++){const p=trail[k];ctx.globalAlpha=(k+1)/trail.length*.6;ctx.fillStyle=k%2?HOT:SUN;ctx.fillRect(H2(p[0])-1,H2(p[1])-1,2,2)}
   ctx.globalAlpha=1;
   let bx=ball.x,by=ball.y;
   if(!running&&!won){by+=Math.round(Math.sin(t/220))*2;
-    if(elsBox.classList.contains('reveal')){const L=Math.hypot(S.LAUNCH.vx,S.LAUNCH.vy);ctx.fillStyle=HOT;for(let k=8;k<=20;k+=3)ctx.fillRect(H2(bx+S.LAUNCH.vx/L*k*2)-0,H2(by+S.LAUNCH.vy/L*k*2),2,2)}}
+    if(elsBox.classList.contains('reveal')){const L=Math.hypot(WD.LAUNCH.vx,WD.LAUNCH.vy);ctx.fillStyle=HOT;for(let k=8;k<=20;k+=3)ctx.fillRect(H2(bx+WD.LAUNCH.vx/L*k*2)-0,H2(by+WD.LAUNCH.vy/L*k*2),2,2)}}
   const sq=1+squash*.4,w=Math.round(11*sq),h=Math.round(11/sq);
   ctx.drawImage(BALL,H2(bx)-(w>>1),H2(by)-(h>>1),w,h);squash*=.82;
   for(const p of particles){ctx.globalAlpha=Math.max(0,Math.min(1,p.life));ctx.fillStyle=p.c;ctx.fillRect(H2(p.x),H2(p.y),2,p.r>3?1:2)}
@@ -513,7 +518,7 @@ function tick(t){
 }
 function gotCoin(i){gotMask|=1<<i;const c=level.coins[i],n=pc(gotMask);sfx.coin(n);coinCt(true);
   for(let k=0;k<10;k++){const a=k/10*Math.PI*2;particles.push({x:c[0],y:c[1],vx:Math.cos(a)*140,vy:Math.sin(a)*140-80,r:Math.random()*6,c:k%2?SUN:'#fff',life:.55})}
-  if(n===level.coins.length){lockGoal(false);retrigger($('goal'),'unlock');setTimeout(sfx.unlock,120)}}
+  if(n===level.coins.length){retrigger($('goal'),'unlock');setTimeout(sfx.unlock,120);status('every coin · now hop the tab','good')}}
 let lastHit={};
 function onHit(h){
   const e=els[h.id],v=views[h.id];if(!v)return;squash=Math.min(1,h.v/700);
@@ -523,37 +528,42 @@ function onHit(h){
 }
 
 /* ---------- launch & result ---------- */
-function launch(){if(running||won)return;A();running=true;launches++;hud();status('');trail=[];acc=0;gotMask=0;lockGoal(true);coinCt();sim=S.start(els,level.coins);sfx.launch()}
+function launch(){if(running||won)return;A();running=true;launches++;hud();status('');trail=[];acc=0;gotMask=0;lockGoal(true);coinCt();sim=S.start(els,level.coins,WD);sfx.launch()}
 const FAIL={fell:'404 · ball not found',stalled:'ball is buffering…',timeout:'request timed out'};
+const BEST='th3-best-'+LAYOUT+'-';
+let best=-1;
 function finish(res){
-  const N=level.coins.length,got=pc(sim.got),tried=sim.triedGoal;running=false;sim=null;
+  const N=level.coins.length,got=pc(sim.got);running=false;sim=null;
   runs.push({g:got,n:N,w:res==='win'});
+  const back=()=>{ball={x:WD.START.x,y:WD.START.y};trail=[];gotMask=0;coinCt();$('goal').classList.remove('opened')};
   if(res==='win'){
-    won=true;hud();$('goal').classList.add('opened');sfx.win();confetti();status('all coins · new tab opened','good');
-    const r={launches,used,n:N,runs:runs.slice()};
-    if(mode==='daily'){const b=store.get('th2-best-'+num);if(!b||r.launches<b.launches||(r.launches===b.launches&&r.used<b.used))store.set('th2-best-'+num,r);homeCard()}
-    setTimeout(()=>showResult(r,false),800);
+    const perfect=got===N;if(got>best)best=got;
+    won=perfect;hud();$('goal').classList.add('opened');sfx.win();confetti();
+    status(perfect?'perfect run · every coin':`tab reached · ${got*100} pts`,'good');
+    const r={k:best,n:N,launches,used,runs:runs.slice(),perfect:best===N};
+    if(mode==='daily'){const b=store.get(BEST+num);if(!b||r.k>b.k||(r.k===b.k&&r.launches<b.launches))store.set(BEST+num,r);homeCard()}
+    setTimeout(()=>{showResult(r,false);if(!perfect)back()},800);
   }else{
-    sfx.fail();status((tried&&got<N?'tab locked · grab every coin first':FAIL[res])+` · ${got}/${N} coins`);
-    setTimeout(()=>{if(!running){ball={x:S.START.x,y:S.START.y};trail=[];gotMask=0;lockGoal(true);coinCt()}hud()},900);
+    sfx.fail();status(FAIL[res]+` · ${got}/${N} coins`);
+    setTimeout(()=>{if(!running)back();hud()},900);
   }
 }
-function confetti(){const G=S.GOAL,cs=[HOT,SUN,MINT,LINK,VISITED];for(let i=0;i<60;i++)particles.push({x:G.x+G.w/2,y:G.y+8,vx:(Math.random()-.5)*400,vy:-200-Math.random()*360,r:Math.random()*6,c:cs[i%5],life:1+Math.random()*.6})}
-function grade(r){return r.launches===1?'FIRST TRY!':r.launches<=3?'SMOOTH HOP.':r.launches<=6?'TAB OPENED.':'PERSISTENCE PAYS.'}
-function shareText(r){const head=mode==='daily'?`Tab-Hopper #${num}`:'Tab-Hopper Practice';
+function confetti(){const G=WD.GOAL,cs=[HOT,SUN,MINT,LINK,VISITED];for(let i=0;i<60;i++)particles.push({x:G.x+G.w/2,y:G.y+8,vx:(Math.random()-.5)*400,vy:-200-Math.random()*360,r:Math.random()*6,c:cs[i%5],life:1+Math.random()*.6})}
+function grade(r){return r.k===r.n?(r.launches===1?'PERFECT. FIRST TRY!':'PERFECT RUN!'):r.k>=r.n-1?'SO CLOSE!':r.k*2>=r.n?'NICE HOP.':r.k>0?'TAB OPENED.':'MADE IT. NO COINS.'}
+function shareText(r){const head=(mode==='daily'?`Tab-Hopper #${num}`:'Tab-Hopper Practice')+(LAND?' 🖥️':' 📱');
   const rows=r.runs.slice(-6).map(x=>'🟡'.repeat(x.g)+'⚫'.repeat(x.n-x.g)+(x.w?' 🚩':''));
-  return `${head} · ${r.launches} launch${r.launches===1?'':'es'} · ${r.used}/${MAX_ACTIONS} moves\n${r.runs.length>6?'…\n':''}${rows.join('\n')}`}
+  return `${head} · ${r.k*100} pts · ${r.launches} launch${r.launches===1?'':'es'}\n${r.runs.length>6?'…\n':''}${rows.join('\n')}`}
 function showResult(r,restored){
   const m=$('modal'),txt=shareText(r);
   m.innerHTML=`<div class="win mwin"><div class="tbar"><span class="dots"><i></i><i></i><i></i></span>result.txt</div><div class="mbody">
   <div class="eyebrow">${mode==='daily'?'TAB-HOPPER #'+num:'PRACTICE PAGE'}${restored?" · TODAY'S BEST":''}</div><h2>${grade(r)}</h2>
-  <div class="stats"><div><b>${r.launches}</b><small>LAUNCHES</small></div><div><b>${r.used}/6</b><small>MOVES</small></div><div><b>${r.n}/${r.n}</b><small>COINS</small></div></div>
+  <div class="stats"><div><b>${r.k*100}</b><small>POINTS</small></div><div><b>${r.k}/${r.n}</b><small>COINS</small></div><div><b>${r.launches}</b><small>LAUNCHES</small></div></div>
   <div class="sharebox">${esc(txt)}</div>
-  <div class="mrow"><button class="cta" id="share">SHARE ↗</button><button class="ghost" id="again">PLAY AGAIN</button></div>
+  <div class="mrow"><button class="cta" id="share">SHARE ↗</button><button class="ghost" id="again">${r.perfect||restored?'PLAY AGAIN':'GO FOR MORE'}</button></div>
   <div class="mrow" style="grid-template-columns:1fr 1fr"><button class="ghost" id="another">PRACTICE ∞</button><button class="ghost" id="close">CLOSE</button></div></div></div>`;
   m.hidden=false;
   $('share').onclick=()=>share(txt);
-  $('again').onclick=()=>{m.hidden=true;reset(false)};
+  $('again').onclick=()=>{m.hidden=true;if(r.perfect||restored)reset(false)};
   $('another').onclick=()=>practice();
   $('close').onclick=()=>{m.hidden=true};
 }
@@ -562,10 +572,10 @@ function readme(){
   m.innerHTML=`<div class="win mwin"><div class="tbar"><span class="dots"><i></i><i></i><i></i></span>readme.txt</div><div class="mbody">
   <div class="eyebrow">HOW TO PLAY</div><h2>HOP THE TAB</h2>
   <ol class="steps"><li><span>Hit <b>▶ LAUNCH</b> and the ball flies off its pad at the top-left.</span></li>
-  <li><span>In one run, it has to grab <b>every coin</b>. Then the locked <b>NEW TAB</b> in the corner opens. Get the ball in.</span></li>
+  <li><span>Land it in the <b>NEW TAB</b> in the corner. Every coin it grabs on the way is <b>100 points</b>. Get them all for a perfect run.</span></li>
   <li><span>You have <b>6 moves</b> to rebuild the page: drag notes, notifications, buttons and pop-ups · close ✕ ads and pop-ups · accept cookies · open or shut the chat.</span></li>
   <li><span>Only the clutter is solid. The page underneath is scenery. <b>◎ SOLID</b> shows what's what, and pink buttons are bouncy.</span></li>
-  <li><span>Tweak and relaunch as often as you like. <b>Fewer launches</b> is a better score. ↺ RESET puts the page back.</span></li></ol>
+  <li><span>Tweak and relaunch as often as you like. Your best finish counts, and ↺ RESET puts the page back.</span></li></ol>
   <button class="cta" id="gotit">GOT IT</button></div></div>`;
   m.hidden=false;$('gotit').onclick=()=>{m.hidden=true;store.set('th-readme',1)};
 }
