@@ -1,10 +1,10 @@
 /* Skins for the non-web daily themes (see themes.js). Hitboxes are the element boxes, so every
    skin fills its box edge to edge. */
-#decor .scene{position:absolute;inset:0}
-#decor .scene canvas.dith,#decor .scene svg{position:absolute;inset:0;width:100%;height:100%}
-#decor .sc-sign{position:absolute;right:12px;top:42px;font:700 15px/1 "Pixelify Sans",monospace;letter-spacing:2px;color:#fbf8f1;opacity:.75;text-shadow:2px 2px 0 #17131f}
-#decor .sc-sign span{font:400 9px "Space Mono",monospace;letter-spacing:.5px}
-.th-kitchen #decor .sc-sign{color:#17131f;text-shadow:2px 2px 0 #fbf8f1;opacity:.6}
+#decor .scene,#side .scene{position:absolute;inset:0}
+#decor .scene canvas.dith,#decor .scene svg,#side .scene canvas.dith,#side .scene svg{position:absolute;inset:0;width:100%;height:100%}
+#decor .sc-sign,#side .sc-sign{position:absolute;right:12px;top:42px;font:700 15px/1 "Pixelify Sans",monospace;letter-spacing:2px;color:#fbf8f1;opacity:.75;text-shadow:2px 2px 0 #17131f}
+#decor .sc-sign span,#side .sc-sign span{font:400 9px "Space Mono",monospace;letter-spacing:.5px}
+.th-kitchen .sc-sign{color:#17131f;text-shadow:2px 2px 0 #fbf8f1;opacity:.6}
 #page[class*="th-"]:not(.th-web) .el-in i{display:block;position:absolute;inset:0;pointer-events:none}
 
 /* ---------- space ---------- */
@@ -84,3 +84,5 @@
 .th-roof .panel .door{background:repeating-linear-gradient(#0000 0 9px,#17131f55 9px 11px)}
 .th-roof .panel .door b{font:700 14px "Pixelify Sans",monospace;background:var(--paper);border:2px solid var(--ink);padding:2px 6px}
 .th-roof .panel .door span{font:8px "Space Mono",monospace;background:var(--paper);padding:0 4px}
+
+#side canvas{image-rendering:pixelated}

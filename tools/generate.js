@@ -208,18 +208,20 @@ function makeLevel(k) {
 const count = +(process.argv[2] || 365), seed = +(process.argv[3] || 20261118);
 rnd = mulberry32(seed);
 const levels = [], t0 = Date.now();
-// difficulty = number of breaks to undo (players get 6 moves): 30% two, 45% three, 25% four.
+// difficulty = number of breaks to undo (players get 6 moves). Levels come out in a weekly mix of
+// 2,2,3,3,4,4,5 (easy Monday ... brutal Sunday); index.html deals them out by weekday.
 // The target is picked first so retries don't skew the mix easy.
+const PATTERN = (process.env.ONLY_K ? [+process.env.ONLY_K] : [2, 2, 3, 3, 4, 4, 5]);
 while (levels.length < count) {
-  const k = rnd() < .3 ? 2 : rnd() < .643 ? 3 : 4;
+  const k = PATTERN[levels.length % PATTERN.length];
   let L = null; while (!L) L = makeLevel(k);
   // final determinism check: the shipped start state must not win, and must round-trip through JSON unchanged
   const back = JSON.parse(JSON.stringify(L.els)); if (reaches(back)) continue;
   levels.push(L);
   if (levels.length % 25 === 0) console.error(levels.length, 'levels', ((Date.now() - t0) / 1000).toFixed(1) + 's');
 }
-const pars = [2, 3, 4].map(p => levels.filter(l => l.par === p).length);
-console.error('done', levels.length, 'breaks 2/3/4:', pars.join('/'), ((Date.now() - t0) / 1000).toFixed(1) + 's');
+const pars = [2, 3, 4, 5].map(p => levels.filter(l => l.par === p).length);
+console.error('done', levels.length, 'breaks 2/3/4/5:', pars.join('/'), ((Date.now() - t0) / 1000).toFixed(1) + 's');
 // argv[4]: 'dry' = don't write; a .json path = write raw batch (merge with tools/merge.js); default = write levels.js
 const outArg = process.argv[4];
 if (outArg && outArg.endsWith('.json')) fs.writeFileSync(outArg, JSON.stringify(levels));
