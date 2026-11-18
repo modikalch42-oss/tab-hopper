@@ -205,6 +205,7 @@ button{font:inherit;color:inherit}
 .steps li::before{content:counter(s);flex:none;width:22px;height:22px;background:var(--sun);border:2px solid var(--ink);font:700 13px/18px "Pixelify Sans",monospace;text-align:center}
 .steps b{font-family:"Pixelify Sans",monospace;font-size:13px}
 </style>
+<link rel="stylesheet" href="themes.css">
 </head>
 <body>
 <header class="top">
@@ -226,14 +227,14 @@ button{font:inherit;color:inherit}
   <div class="win hero">
     <div class="tbar"><span class="dots"><i></i><i></i><i></i></span>welcome.html</div>
     <div class="hero-in">
-      <div class="eyebrow">THE INTERNET IS 90% POP-UPS</div>
+      <div class="eyebrow">A NEW MESS EVERY DAY</div>
       <div class="logo"><span class="u">TAB-HOPPER</span><span id="logoCur"></span></div>
       <div class="rule">THE DAILY CLICK-THROUGH</div>
-      <p class="tagline">Three clicks. One bouncy ball.<br>Far too many pop-ups.</p>
+      <p class="tagline">Six moves. One bouncy ball.<br>Grab the coins, hop the tab.</p>
     </div>
   </div>
   <div class="win start">
-    <div class="row1"><span>TODAY'S PAGE</span><button class="lnk" id="howBtn">HOW TO PLAY ↗</button></div>
+    <div class="row1"><span id="todayLbl">TODAY'S LEVEL</span><button class="lnk" id="howBtn">HOW TO PLAY ↗</button></div>
     <div class="siterow"><span class="fav" id="hFav"></span><span class="host" id="hHost">…</span><span class="par" id="hPar">PAR –</span></div>
     <button class="cta" id="openBtn">▶ OPEN TODAY'S PAGE</button>
     <div class="fine">6 MOVES · COINS = POINTS · FINISH IN THE NEW TAB</div>
@@ -264,6 +265,7 @@ button{font:inherit;color:inherit}
 
 <script src="sim.js"></script>
 <script src="sites.js"></script>
+<script src="themes.js"></script>
 <script src="levels.js"></script>
 <script src="levels-land.js"></script>
 <script>
@@ -332,26 +334,33 @@ function todayNum(){const d=new Date();return Math.floor((Date.UTC(d.getFullYear
 const num=todayNum(),dailyIdx=((num-1)%NL+NL)%NL;
 const MON=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'],now=new Date();
 const DAYTXT=`#${num} · ${MON[now.getMonth()]} ${now.getDate()}`;
+const THEMES=window.TAB_THEMES||{},ORDER=window.TAB_THEME_ORDER||['web'];
+let theme=themeFor(dailyIdx);
+function themeFor(i){const q=QS.get('theme');return q&&(q==='web'||THEMES[q])?q:ORDER[i%ORDER.length]}
+const WEBN={drag:'notes, notifications, buttons and pop-ups',close:'close ✕ ads and pop-ups',accept:'accept cookies',toggle:'open or shut the chat'};
 let runs=[],gotMask=0,mode='daily',idx=0,level,els,used=0,history=[],launches=0,running=false,won=false,views=[],scale=1,site=SITES[0];
 const pc=m=>{let c=0;while(m){m&=m-1;c++}return c};
 const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 
 /* ---------- screens ---------- */
 function show(id){$('home').hidden=id!=='home';$('game').hidden=id!=='game';$('menu').hidden=true;if(id==='game')fit();else $('topNum').textContent=DAYTXT;scrollTo(0,0)}
-function homeCard(){const s=SITES[dailyIdx%SITES.length],L=LEVELS[dailyIdx];
-  $('hFav').style.background=ACC[s.id];$('hHost').textContent=s.host;$('hPar').textContent=(L?L.coins.length:'–')+' COINS';
-  const best=store.get(BEST+num);$('openBtn').textContent=best?'▶ REPLAY TODAY\'S PAGE':'▶ OPEN TODAY\'S PAGE'}
+function homeCard(){const th=themeFor(dailyIdx),s=SITES[Math.floor(dailyIdx/ORDER.length)%SITES.length],L=LEVELS[dailyIdx],T=THEMES[th];
+  $('hFav').style.background=th==='web'?ACC[s.id]:T.acc;$('hHost').textContent=th==='web'?s.host:T.name;$('hPar').textContent=(L?L.coins.length:'–')+' COINS';
+  const word=th==='web'?'PAGE':'LEVEL';$('todayLbl').textContent="TODAY'S "+word;
+  const best=store.get(BEST+num);$('openBtn').textContent=(best?'▶ REPLAY TODAY\'S ':'▶ PLAY TODAY\'S ')+word}
 
 /* ---------- the website inside the window ---------- */
 function decor(){
-  site=SITES[idx%SITES.length];const acc=ACC[site.id];
-  $('decor').innerHTML=site.html;page.style.setProperty('--acc',acc);$('bwin').style.setProperty('--acc',acc);$('modal').style.setProperty('--acc',acc);
-  $('host').textContent=site.host;$('path').textContent=site.path;
+  theme=themeFor(idx);const T=THEMES[theme],web=theme==='web';
+  site=SITES[Math.floor(idx/ORDER.length)%SITES.length];   // web days cycle through the fake sites
+  const acc=web?ACC[site.id]:T.acc;page.className='th-'+theme;
+  $('decor').innerHTML=web?site.html:T.scene(WD.W,WD.H);page.style.setProperty('--acc',acc);$('bwin').style.setProperty('--acc',acc);$('modal').style.setProperty('--acc',acc);
+  $('host').textContent=web?site.host:T.place;$('path').textContent=web?site.path:'';$('lock').hidden=!web;
   const g=$('goal'),G=WD.GOAL;g.style.left=G.x+'px';g.style.top=G.y+'px';g.style.width=G.w+'px';g.style.height=G.h+'px';
-  dither(acc);
+  dither(acc,web?null:T.pal);
 }
 // redraw the site's illustrations as small ordered-dither pixel images in the site palette
-function dither(acc){const pal=[INK,PAPER,acc,SUN,'#b9b2cc',HOT].map(rgb);
+function dither(acc,tp){const pal=(tp||[INK,PAPER,acc,SUN,'#b9b2cc',HOT]).map(rgb);
   document.querySelectorAll('#decor svg').forEach(svg=>{const vb=svg.viewBox.baseVal;if(!vb||!vb.width)return;const w=Math.round(vb.width/3),h=Math.round(vb.height/3),img=new Image();
     img.onload=()=>{const c=document.createElement('canvas');c.width=w;c.height=h;c.className='dith';const x=c.getContext('2d');x.drawImage(img,0,0,w,h);
       try{const d=x.getImageData(0,0,w,h),p=d.data;for(let i=0;i<w*h;i++){const px=i%w,py=(i/w)|0,o=(BAY[(py&3)*4+(px&3)]/16-.5)*72;let best=0,bd=1e9;
@@ -374,7 +383,7 @@ const ang=e=>Math.atan2(e.s,e.c)*180/Math.PI;
 const esc=s=>String(s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const SUBS=['SUBSCRIBE','FOLLOW +','SIGN UP','DONATE','JOIN NOW'];
 const POPNAME=['newsletter.html','offer.exe','popup(1).html'];
-function captions(){const n={};els.forEach(e=>{const k=n[e.t]=(n[e.t]||0);n[e.t]++;
+function captions(){const n={};els.forEach(e=>{const k=n[e.t]=(n[e.t]||0);n[e.t]++;e.k=k;
   if(e.t==='popup')e.d={...site.popups[(k+idx)%site.popups.length],f:POPNAME[(k+idx)%POPNAME.length]};
   else if(e.t==='ad')e.d=ADS[(k+idx*2)%ADS.length];
   else if(e.t==='toast')e.d=TOASTS[(k+idx*3)%TOASTS.length];
@@ -382,6 +391,7 @@ function captions(){const n={};els.forEach(e=>{const k=n[e.t]=(n[e.t]||0);n[e.t]
   else if(e.t==='sub')e.d={t:SUBS[k%SUBS.length]}})}
 const XI=pix(P.x,{'#':INK});
 function elHTML(e){
+  if(theme!=='web')return THEMES[theme].el(e,e.k||0,{XI});
   const d=e.d||{};
   if(e.t==='note')return esc(d.txt);
   if(e.t==='toast')return `<span class="ti">${esc((d.t||'?')[0])}</span><span class="tw"><div class="tt2">${esc(d.t)}</div><div class="tb2">${esc(d.b)}</div></span>`;
@@ -397,7 +407,8 @@ function build(){
     const v=document.createElement('div');v.dataset.i=i;
     if(e.t==='chat'){
       const P2=S.PANEL;v.className='el chat'+(e.open?' open':'');
-      v.innerHTML=`<div class="panel" style="left:${22+P2.dx-P2.hw}px;top:${22+P2.dy-P2.hh}px;width:${2*P2.hw}px;height:${2*P2.hh}px"><div class="ph"><b>${esc(site.chat.name)}</b><span>usually replies in 3–5 business years</span></div><div class="msg">${esc(site.chat.msg)}</div><div class="msg me">i'm just trying to read</div><div class="inp">write a reply…</div></div><div class="bubble">···</div>`;
+      const T=THEMES[theme],inner=theme==='web'?`<div class="ph"><b>${esc(site.chat.name)}</b><span>usually replies in 3–5 business years</span></div><div class="msg">${esc(site.chat.msg)}</div><div class="msg me">i'm just trying to read</div><div class="inp">write a reply…</div>`:T.panel;
+      v.innerHTML=`<div class="panel" style="left:${22+P2.dx-P2.hw}px;top:${22+P2.dy-P2.hh}px;width:${2*P2.hw}px;height:${2*P2.hh}px">${inner}</div><div class="bubble">${theme==='web'?'···':T.bubble}</div>`;
       v.style.left=(e.x-22)+'px';v.style.top=(e.y-22)+'px';v.style.width='44px';v.style.height='44px';
     }else{
       v.className=`el ${e.t}${DRAGGABLE.has(e.t)?' draggable':''}${e.t==='note'?' h'+(e.hue||0):''}`;
@@ -434,7 +445,7 @@ function hud(){
   $('topNum').textContent=mode==='practice'&&!$('game').hidden?'PRACTICE PAGE':DAYTXT;
   $('launch').disabled=running||won;$('reset').disabled=running;
 }
-function lockGoal(){$('goalIco').innerHTML=FLAGI;$('goalTxt').textContent='NEW TAB'}
+function lockGoal(){$('goalIco').innerHTML=FLAGI;$('goalTxt').textContent=theme==='web'?'NEW TAB':THEMES[theme].goal}
 function coinCt(pop){const c=$('coinCt');c.innerHTML=COINI+`${pc(gotMask)}/${level?level.coins.length:0}`;if(pop)retrigger(c,'pop')}
 function status(t,cls){$('status').innerHTML=t?`<span class="${cls||''}">${esc(t)}</span>`:''}
 function spend(icon){used++;history.push(icon);hud();status('')}
@@ -470,7 +481,7 @@ function endDrag(){
   if(!drag)return;const d=drag,e=d.e,v=d.v;drag=null;
   v.classList.remove('drag');v.firstChild.style.transform='';
   if(!d.moved){e.x=d.x0;e.y=d.y0;place(v,e);return}
-  if(hitsBox(e,START_BOX,6)||hitsBox(e,WD.GOAL,4)){
+  if(hitsBox(e,START_BOX,5)||hitsBox(e,WD.GOAL,3)){   // 1px more lenient than the generator, so every designed spot is accepted
     e.x=d.x0;e.y=d.y0;v.classList.add('back');place(v,e);sfx.deny();status("Can't cover the ball or the new tab");return}
   e.x=Math.round(e.x*10)/10;e.y=Math.round(e.y*10)/10;place(v,e);
   retrigger(v,'drop');sfx.drop();spend(ICON[e.t]);
@@ -568,13 +579,13 @@ function showResult(r,restored){
   $('close').onclick=()=>{m.hidden=true};
 }
 function readme(){
-  const m=$('modal');
+  const m=$('modal'),T=THEMES[theme],NN=theme==='web'?WEBN:T.nouns,GN=theme==='web'?'NEW TAB':T.goal;
   m.innerHTML=`<div class="win mwin"><div class="tbar"><span class="dots"><i></i><i></i><i></i></span>readme.txt</div><div class="mbody">
   <div class="eyebrow">HOW TO PLAY</div><h2>HOP THE TAB</h2>
   <ol class="steps"><li><span>Hit <b>▶ LAUNCH</b> and the ball flies off its pad at the top-left.</span></li>
-  <li><span>Land it in the <b>NEW TAB</b> in the corner. Every coin it grabs on the way is <b>100 points</b>. Get them all for a perfect run.</span></li>
-  <li><span>You have <b>6 moves</b> to rebuild the page: drag notes, notifications, buttons and pop-ups · close ✕ ads and pop-ups · accept cookies · open or shut the chat.</span></li>
-  <li><span>Only the clutter is solid. The page underneath is scenery. <b>◎ SOLID</b> shows what's what, and pink buttons are bouncy.</span></li>
+  <li><span>Land it in the <b>${GN}</b> in the corner. Every coin it grabs on the way is <b>100 points</b>. Get them all for a perfect run.</span></li>
+  <li><span>You have <b>6 moves</b> to rebuild the ${theme==='web'?'page':'scene'}: drag ${NN.drag} · ${NN.close} · ${NN.accept} · ${NN.toggle}.</span></li>
+  <li><span>Only the clutter is solid. The background is scenery. <b>◎ SOLID</b> shows what's what, and pink things are bouncy.</span></li>
   <li><span>Tweak and relaunch as often as you like. Your best finish counts, and ↺ RESET puts the page back.</span></li></ol>
   <button class="cta" id="gotit">GOT IT</button></div></div>`;
   m.hidden=false;$('gotit').onclick=()=>{m.hidden=true;store.set('th-readme',1)};

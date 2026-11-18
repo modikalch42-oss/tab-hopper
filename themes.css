@@ -1,0 +1,86 @@
+/* Skins for the non-web daily themes (see themes.js). Hitboxes are the element boxes, so every
+   skin fills its box edge to edge. */
+#decor .scene{position:absolute;inset:0}
+#decor .scene canvas.dith,#decor .scene svg{position:absolute;inset:0;width:100%;height:100%}
+#decor .sc-sign{position:absolute;right:12px;top:42px;font:700 15px/1 "Pixelify Sans",monospace;letter-spacing:2px;color:#fbf8f1;opacity:.75;text-shadow:2px 2px 0 #17131f}
+#decor .sc-sign span{font:400 9px "Space Mono",monospace;letter-spacing:.5px}
+.th-kitchen #decor .sc-sign{color:#17131f;text-shadow:2px 2px 0 #fbf8f1;opacity:.6}
+#page[class*="th-"]:not(.th-web) .el-in i{display:block;position:absolute;inset:0;pointer-events:none}
+
+/* ---------- space ---------- */
+.th-space .note .el-in{background:#2b44ff;padding:0}
+.th-space .note .cells{background-image:linear-gradient(90deg,#ffffff66 2px,transparent 2px),linear-gradient(#ffffff66 2px,transparent 2px);background-size:14px 100%,100% 11px}
+.th-space .toast .el-in{background:#b9b2cc;padding:0}
+.th-space .toast .truss{background:repeating-linear-gradient(60deg,transparent 0 9px,var(--ink) 9px 11px),repeating-linear-gradient(-60deg,transparent 0 9px,var(--ink) 9px 11px);margin:5px 0;border-top:2px solid var(--ink);border-bottom:2px solid var(--ink)}
+.th-space .sub .el-in{background:var(--hot);font-size:9.5px;letter-spacing:2px}
+.th-space .popup .el-in{background:#ff8a00;padding:0}
+.th-space .popup .haz{height:12px;background:repeating-linear-gradient(45deg,var(--ink) 0 7px,var(--sun) 7px 14px);border-bottom:2px solid var(--ink)}
+.th-space .crate{padding:12px 8px;text-align:center}
+.th-space .crate b{display:block;font:700 26px/1 "Pixelify Sans",monospace;letter-spacing:3px;color:var(--ink);opacity:.85}
+.th-space .crate span{font:700 8px "Space Mono",monospace;letter-spacing:1px}
+.th-space .ad .el-in{background:#b9b2cc;background-image:repeating-conic-gradient(#0000 0 25%,#17131f22 0 50%);background-size:4px 4px;padding:10px 8px}
+.th-space .junk b{display:block;font:700 15px "Pixelify Sans",monospace}
+.th-space .junk span{font:700 7.5px "Space Mono",monospace;letter-spacing:1px;color:#5d5670}
+.th-space .cookie .el-in{background:transparent;padding:0;justify-content:flex-end}
+.th-space .cookie .beams{inset:10px 12px;background:repeating-linear-gradient(#0000 0 6px,#ff4f8b 6px 9px,#0000 9px 15px);filter:drop-shadow(0 0 3px #ff4f8b)}
+.th-space .cookie .em{width:12px;inset:0 auto 0 0;background:var(--ink);border:2px solid #b9b2cc}
+.th-space .cookie .em.r{left:auto;right:0}
+.th-space .cookie .accept{position:relative;margin-right:20px;border-color:var(--ink);box-shadow:2px 2px 0 var(--ink)}
+.th-space .bubble{background:#e62117;font-size:20px;border-radius:50%}
+.th-space .bubble::after{display:none}
+.th-space .panel .door,.th-kitchen .panel .door,.th-roof .panel .door{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.th-space .panel{background:#b9b2cc}
+.th-space .panel .door{background:repeating-linear-gradient(#0000 0 22px,#17131f33 22px 24px);border:6px solid #8a83a0}
+.th-space .panel .door b{font:700 16px "Pixelify Sans",monospace;background:var(--sun);border:2px solid var(--ink);padding:2px 6px}
+.th-space .panel .door span{font:700 8px "Space Mono",monospace}
+
+/* ---------- kitchen ---------- */
+.th-kitchen .note .el-in{background:#d79b5a;padding:0;border-radius:12px 3px 3px 12px}
+.th-kitchen .note .grain{background:repeating-linear-gradient(90deg,#0000 0 10px,#8a5a2b55 10px 12px)}
+.th-kitchen .toast .el-in{background:#e8a74f;padding:0;border-radius:16px}
+.th-kitchen .toast .scores{background:repeating-linear-gradient(115deg,#0000 0 18px,#fff3d6 18px 22px,#0000 22px 30px);border-radius:14px;margin:6px 10px}
+.th-kitchen .sub .el-in{background:#ff4f8b;background-image:linear-gradient(#ffffff88 0 4px,#0000 4px);border-radius:10px 10px 4px 4px;color:#fff;text-shadow:1px 1px 0 var(--ink);letter-spacing:3px}
+.th-kitchen .sub.pressed .el-in{transform:scale(1.12,.8)}
+.th-kitchen .popup .el-in{background:var(--sun);padding:0}
+.th-kitchen .box{padding:12px 8px 0;text-align:center}
+.th-kitchen .box b{display:block;font:700 19px/1 "Pixelify Sans",monospace;color:#e8590c;text-shadow:2px 2px 0 var(--ink)}
+.th-kitchen .box span{display:block;font:700 7px "Space Mono",monospace;margin-top:5px;letter-spacing:.8px}
+.th-kitchen .box .bowl{position:static;margin:8px auto 0;width:44px;height:20px;background:#fff;border:2px solid var(--ink);border-radius:0 0 22px 22px}
+.th-kitchen .ad .el-in{background:#fff;background-image:repeating-linear-gradient(#0000 0 11px,#cdd4ff 11px 12px);padding:10px 8px}
+.th-kitchen .card b{display:block;font:700 13px "Pixelify Sans",monospace;color:#d1004f}
+.th-kitchen .card span{font:8px/1.4 "Space Mono",monospace}
+.th-kitchen .cookie .el-in{background:#8a83a0;padding:0 10px;justify-content:flex-end;border:2px solid var(--ink)}
+.th-kitchen .cookie .tray{inset:8px 100px 8px 10px;background:radial-gradient(circle at 50% 50%,#7a3e12 0 2px,#d79b5a 3px 12px,#0000 13px);background-size:30px 100%}
+.th-kitchen .cookie .accept{position:relative;border-color:var(--ink);box-shadow:2px 2px 0 var(--ink)}
+.th-kitchen .bubble{background:#d79b5a;color:var(--ink);font-size:18px}
+.th-kitchen .bubble::after{display:none}
+.th-kitchen .panel{background:#d79b5a}
+.th-kitchen .panel .door{border:8px solid #b7773b;outline:2px solid var(--ink);outline-offset:-10px}
+.th-kitchen .panel .door b{font:700 13px "Pixelify Sans",monospace;color:var(--ink)}
+.th-kitchen .panel .knob{position:static;width:12px;height:12px;border-radius:50%;background:var(--sun);border:2px solid var(--ink)}
+
+/* ---------- rooftops ---------- */
+.th-roof .note .el-in{background:#b7773b;padding:0}
+.th-roof .note .grain{background:repeating-linear-gradient(90deg,#0000 0 24px,var(--ink) 24px 26px),repeating-linear-gradient(#0000 0 7px,#8a5a2b66 7px 8px)}
+.th-roof .toast .el-in{background:var(--paper);padding:0}
+.th-roof .toast .stripes{background:repeating-linear-gradient(90deg,var(--hot) 0 14px,var(--paper) 14px 28px);clip-path:polygon(0 0,100% 0,100% 70%,96% 100%,92% 70%,88% 100%,84% 70%,80% 100%,76% 70%,72% 100%,68% 70%,64% 100%,60% 70%,56% 100%,52% 70%,48% 100%,44% 70%,40% 100%,36% 70%,32% 100%,28% 70%,24% 100%,20% 70%,16% 100%,12% 70%,8% 100%,4% 70%,0 100%)}
+.th-roof .sub .el-in{background:var(--hot);padding:0}
+.th-roof .sub .springs{inset:6px 6px;background:var(--ink);border-radius:10px}
+.th-roof .popup .el-in{background:var(--ink);padding:0;border-color:var(--ink)}
+.th-roof .board{position:absolute;inset:8px;border:2px solid var(--hot);box-shadow:0 0 8px var(--hot),inset 0 0 8px var(--hot);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.th-roof .board b{font:700 20px/1 "Pixelify Sans",monospace;color:var(--sun);text-shadow:0 0 6px var(--sun)}
+.th-roof .board span{font:8px "Space Mono",monospace;color:#fbf8f1;margin-top:4px}
+.th-roof .popup .x-btn{top:-2px;right:-2px}
+.th-roof .ad .el-in{background:#fbf8f1;padding:10px 8px;transform:rotate(-2deg)}
+.th-roof .poster b{display:block;font:700 14px "Pixelify Sans",monospace;color:#d1004f}
+.th-roof .poster span{font:8px "Space Mono",monospace}
+.th-roof .cookie .el-in{background:transparent;padding:0 10px;justify-content:flex-end}
+.th-roof .cookie .line{inset:8px 0 auto 0;height:2px;background:var(--paper)}
+.th-roof .cookie .clothes{inset:10px 110px 6px 20px;background:linear-gradient(90deg,var(--hot) 0 26px,#0000 26px 46px,var(--sun) 46px 70px,#0000 70px 90px,var(--mint) 90px 108px,#0000 108px);background-size:120px 100%}
+.th-roof .cookie .accept{position:relative;border-color:var(--ink);box-shadow:2px 2px 0 var(--ink)}
+.th-roof .bubble{background:var(--sun);color:var(--ink);font-size:18px}
+.th-roof .bubble::after{display:none}
+.th-roof .panel{background:#8a83a0}
+.th-roof .panel .door{background:repeating-linear-gradient(#0000 0 9px,#17131f55 9px 11px)}
+.th-roof .panel .door b{font:700 14px "Pixelify Sans",monospace;background:var(--paper);border:2px solid var(--ink);padding:2px 6px}
+.th-roof .panel .door span{font:8px "Space Mono",monospace;background:var(--paper);padding:0 4px}
